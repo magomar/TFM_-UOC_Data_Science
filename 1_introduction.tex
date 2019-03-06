@@ -3,10 +3,11 @@
 
 \section{Motivation}
 
-The web is filled with billions of images, helping to entertain and inform the world on a countless variety of subjects. However, much of that visual information is not accessible to those with visual impairments, or with slow internet speeds that prohibit the loading of images. Image captions, manually added by website authors using\textit{ Alt-text HTML}, is one way to make this content more accessible, so that a natural-language description for images that can be presented using \textit{text-to-speech} systems. However, existing human-curated \textit{Alt-text HTML} fields are added for only a very small fraction of web images. 
-And while automatic image captioning can help solve this problem, accurate image captioning is a challenging task that requires advancing the state of the art of both computer vision and natural language processing.
+The web provides a vast amount of information, including a lot of text, but it is increasingly dominated by visual information, both static (pictures) and dynamic (videos).  However, much of that visual information is not accessible to those with visual impairments, or with slow internet speeds that prohibit the loading of images. Image captions, manually added by content providers (typically by using the \textit{ Alt-text} HTML tag), is one way to make this content more accessible, so that a natural-language description of images and videos can be presented using \textit{text-to-speech} systems. However, existing human-curated image descriptions are added for only a very small fraction of web images. Thus, there is great interest in developing methods to automatically generate image descriptions.
 
-Automatic image captioning --also called automatic image description--, the task of automatically producing a natural-language description for an image, can help solve this problem when combined with text-to-speech systems.  However, accurate image captioning is a challenging task that requires the joint use of techniques from two research fields: Computer Vision (CV) and Natural Language Processing (NLP).
+Automatic image description can be defined as the task of automatically generating a description of an image using natural language. It is a very challenging problem that encompasses two kind of problems: the problem of understanding an image, which is a Computer Vision (CV) task, and the problem of generating a meaningful and grammatically-correct description of the image, which is kind of Natural-Language Processing (NLP) task . Therefore, to tackle this task it is necessary to advance the research in the two fields, CV and NLP, as well as promoting the cooperation of both communities to address the specific problems arising when combining both tasks.
+
+Figure \ref{fig:image-captioning} shows an example of the automatic image generation tasks addressed by this project.
 
 \begin{figure}
 	\centering
@@ -15,24 +16,28 @@ Automatic image captioning --also called automatic image description--, the task
 	\label{fig:image-captioning}
 \end{figure}
 
+In addition to the aforementioned application of image captioning to help the visually impaired, there are many other use cases in which automatic image descriptions may help. In general, any domain in which images need to be interpreted by humans, but human availability is scarce or it is a tedious task, may benefit from an automated approach to image description.
+
+A specific use case is the analysis and extraction of information from videos. Some video monitoring tasks are very boring and tedious. An automated mechanism to describe scenes in video footage will be of great utility for creating summaries or monitoring specific situations and events. \footnote{As an interesting example, Shell is conducting a pilot study using deep-learning to automatically monitor video footage in order to identify safety hazards and generate alerts (\href{https://customers.microsoft.com/en-us/story/shell-mining-oil-gas-azure-databricks}{link})}.
+
+Another potential utility of automatic image description lies in the task of searching images. Having automatically generated captions for images that originally hasn't been described, would help finding images based on a complex description rather that a simple collection of tags.
+
 \section{Goals}
 
-This project aims at advancing in the task of automatically generate image captions. That is the ultimate goal from a very abstract viewpoint. Nevertheless, in order to achieve such an abstract goal, we decompose it into various subgoals, with the aim of achieving at least thee of the them. The subgoals are:
+This project aims at advancing in the task of automatically generating image descriptions. That is the ultimate goal of the project. However, in order to achieve such an abstract goal, we decompose it into various subgoals, as follows:
 
 \begin{enumerate}
-\item Get a solid understanding of the problem at hand and the state-of-art solutions to it
+\item Get a solid understanding of the problem at hand and review the state-of-art solutions to it
 \item Get practical knowledge on the technologies required to solve this problem
-\item Develop a model to be used as a baseline. This model could replicate models that were the state-of-art not so long ago, like the BRNN \cite{Karpathy2017} for the MS-COCO dataset \cite{Lin2014}.
-\item Develop a more advanced model using the much larger dataset recently released by Google: the Conceptual Captions Dataset\cite{Sharma2018} (see Figure \ref{fig:conceptual-captions}), and compare with the baseline.
-\item Partaking in the \href{https://ai.google.com/research/ConceptualCaptions/}{Conceptual Captions Challenge} introduced recently by Google.
-\item Deploy a working prototype for personal, non commercial use by anyone interested. The specific type of product has yet to be defined (could be a telegram bot, a flickr  
+\item Develop a model using a benchmark dataset like the Flickr30K
+\item Scale the model to a larger benchmark dataset such as the COCO\cite{Lin2014} dataset or the more recent Conceptual Captions Dataset by Google \cite{Sharma2018}  (see Figure \ref{fig:conceptual-captions}).
+\item Evaluate the model, ideally partaking in some challenge or competition, like the ones using the COCO dataset or the Conceptual Captions dataset.
 \end{enumerate}
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.6\textwidth]{figs/ch1/conceptual-captions-example.png}
-	\caption{Illustration of images and captions in the Conceptual Captions dataset. 
-Clockwise from top left, images by Jonny Hunter, SigNote Cloud, Tony Hisgett, ResoluteSupportMedia. All images used under \href{https://creativecommons.org/licenses/by/2.0/}{CC BY 2.0 license}.}
+	\caption{Illustration of images and captions in the Conceptual Captions dataset.Clockwise from top left, images by Jonny Hunter, SigNote Cloud, Tony Hisgett, ResoluteSupportMedia. All images used under \href{https://creativecommons.org/licenses/by/2.0/}{CC BY 2.0 license}.}
 	\label{fig:conceptual-captions}
 \end{figure}
 

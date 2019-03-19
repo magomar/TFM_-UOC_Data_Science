@@ -1,10 +1,33 @@
 \chapter{State of the Art}
 \label{chapter:state_of_the_art}
 
-Automatic image description can be defined as the task of automatically generating a textual description of an image. It is a challenging problem that encompasses two kind of problems that are also challenging themselves: the problem of understanding an image, and the problem of generating a comprehensive, meaningful and grammatically-correct description of the image. Therefore, it is a task involving research from both Computer Vision (CV) and Natural-Language Processing (NLP).
+Recently there have been an upsurge of interest in problems that require a combination of linguistic and visual information. Besides, the rise of social media in the web has made available a vast amount of multimodal information, like tagged photographs, illustrations in newspaper articles, videos with subtitles, and multimodal feeds on social media. To tackle combined language and vision tasks and to exploit the large amounts of multimodal information, the CV and NLP communities have been increasingly cooperating, for example by organizing combined workshops and conferences. One such area of research in the intersection of both worlds is automatic image description.
 
-Both CV and NLP are challenging fields themselves. While both fields share common techniques rooted in artificial intelligence and machine learning, they have historically developed separately, with little interaction between their scientific communities. However, recently there have been an upsurge of interest in problems that require a combination of linguistic and visual information. Besides, the rise of social media in the web has made available a vast amount of multimodal information, like tagged photographs, illustrations in newspaper articles, videos with subtitles, and multimodal feeds on social media.
+\textbf{Automatic image description} can be defined as the task of automatically generating a description of an image using natural language. It is a very challenging problem that combines two different problems into a single task: on the one hand, there is the problem of understanding an image, which belongs to the \textbf{Computer Vision (CV)} field, one the other hand, there is also the problem of generating a meaningful and grammatically-correct description of the image, which belongs to the \textbf{Natural-Language Processing (NLP)} field, and to be more precise, it belongs to the class of \textbf{Natural-Language Generation (NLG)} problems.
 
-To exploit the large amounts of multimodal information it is necessary not just to advance in CV and NLP independent research, but to increase the cooperation of both communities and address these tasks as a new kind of tasks
+Both CV and NLP are challenging fields themselves. While both fields share common techniques rooted in artificial intelligence and machine learning, they have historically developed separately, with little interaction between their scientific communities.  Recent years have seen considerable advances in both fields, to a great extent thanks to the application of deep-learning techniques and the recent advances in this area. This chapter presents a brief survey of the recent literature on this topic, including some antecedents, but focusing primarily on the recent advances coming from the application of \textbf{Deep Learning} technology, since this is our main interest.
 
-To tackle combined language and vision tasks and to exploit the large amounts of multimodal information, the CV and NLP communities have been increasingly cooperating, for example by organizing combined workshops and conferences.
+The chapter is organized in various sections. First section is devoted to further delimiting the task at hand as well as introducing classification system for the different approaches to the problem. Subsequent sections review relevant publications organized according to the provided classification scheme. Finally, there is a section describing the datasets used by the community to benchmark their models and a short discussion on the evaluation metrics for this kind of tasks.
+
+\section{Task definition and classification of models}
+
+We have already defined the task of automatic image description as the task of automatically generating a description of an image using natural language generation. However, this definition is too generic to precisely characterize the task we are interested in. For example, when presented with certain image, an algorithm may generate a list of labels describing different elements of the image, or it may describe technical features of the image, such as the dimensions, the predominant colors, brightness, etc. Therefore, we need a more concrete definition of the task.
+
+When talking about \textbf{automatic image description}, we refer to descriptions that meet three properties:
+- Descriptions that are relevant, that is, that talk about the elements of the image.
+- Descriptions that are expressed as natural language, using grammatically correct sentences
+- Descriptions that are comprehensive but concise at the same time, that is, the description should aim at summing up the important elements of the image, not just describing it.
+
+From the CV point of view, this task requires \textbf{full image understanding}: the description should demonstrate or pretend a good understanding of the scene, far beyond simply recognizing the objects in the image. This means that the description is able to capture relations between the objects in the scene, and the actions happening there.
+
+From the NLP point of view, this task requires \textbf{sophisticated natural language generation} (NLG), which involves: selecting which aspects to talk about (content selection), sorting and organizing the content to be verbalized (text planning), and finally generating a semantically and syntactically correct sentence (Surface realization).
+
+Intuitively, descriptions should be easy to understand to a person, and that person should be able to grasp the essence of the image, to create a mental model of the image. The description task can become even more challenging when we take into account user-specific tailored descriptions. For instance, when describing the paintings available in a museum, a  tourist may require a different description than a librarian.
+
+\section{Direct generation models}
+
+\section{Retrieval approaches using visual information}
+
+\section{Retrieval approaches using multimodal information}
+
+\section{Benchmark datasets and evaluation metrics}

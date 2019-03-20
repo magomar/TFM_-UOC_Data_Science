@@ -1,10 +1,10 @@
 \documentclass[12pt,a4paper,twoside]{book}
 \usepackage{graphicx}
 \usepackage{setspace}	%double spacing for text, single for captions, footnotes, etc.
-%\usepackage{hypernat} 	%substitut de cite que permet fer hyperlinks
-\usepackage{natbib}		% substituye a 'hypernat' que funciona en Windows.
-\usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{natbib}
+\addbibresource{references.bib}
 \usepackage{color}
 \usepackage{hhline} 		% extended styles for tables
 \usepackage{multirow}
@@ -103,7 +103,7 @@
 
 % bibliografia
 \addcontentsline{toc}{chapter}{Bibliography}
-\bibliographystyle{plain}
+\bibliographystyle{apalike}
 \bibliography{references}
 
 \end{document}

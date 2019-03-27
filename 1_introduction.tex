@@ -3,24 +3,26 @@
 
 \section{Motivation}
 
-The web provides a vast amount of information, including a lot of text, but it is increasingly dominated by visual information, both static (pictures) and dynamic (videos).  However, much of that visual information is not accessible to those with visual impairments, or with slow internet speeds that prohibit the loading of images. Image captions, manually added by content providers (typically by using the \textit{ Alt-text} HTML tag), is one way to make this content more accessible, so that a natural-language description of images and videos can be presented using \textit{text-to-speech} systems. However, existing human-curated image descriptions are added for only a very small fraction of web images. Thus, there is great interest in developing methods to automatically generate image descriptions.
+The web provides a vast amount of information, including a lot of text, but it is increasingly dominated by visual information, both static (pictures) and dynamic (videos).  However, much of that visual information is not accessible to those with visual impairments, or with slow internet speeds that prohibit the loading of images. Image captions, manually added by content providers (typically by using the \textit{ Alt-text} HTML tag), is one way to make this content more accessible, so that a \textit{text-to-speech} system can be applied to generate a natural-language description of images and videos. However, existing human-curated image descriptions are added for only a very small fraction of web images. Thus, there is great interest in developing methods to automatically generate image descriptions.
 
-Automatic image description can be defined as the task of automatically generating a description of an image using natural language. It is a very challenging problem that encompasses two kind of problems: the problem of understanding an image, which is a Computer Vision (CV) task, and the problem of generating a meaningful and grammatically-correct description of the image, which is a kind of Natural-Language Processing (NLP) task . Therefore, to tackle this task it is necessary to advance the research in the two fields, CV and NLP, as well as promoting the cooperation of both communities to address the specific problems arising when combining both tasks.
+Automatic image description --also known as automatic image captioning-- can be defined as the task of automatically generating a description of an image using natural language. It is a very challenging problem that encompasses two kind of problems: the problem of understanding an image, which is a \textbf{Computer Vision (CV)} task, and the problem of generating a meaningful and grammatically-correct description of the image, which is a kind of \textbf{Natural-Language Processing (NLP)} task . Therefore, to tackle this task it is necessary to advance the research in the two fields, CV and NLP, as well as promoting the cooperation of both communities to address the specific problems arising when combining both tasks.
 
 Figure \ref{fig:image-captioning} shows an example of the automatic image generation tasks addressed by this project.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
-	\includegraphics[width=0.6\textwidth]{figs/ch1/image-captioning.png}
+	\includegraphics[scale=0.5]{/ch1/image-captioning.png}
 	\caption{Image captioning can help millions with visual impairments by converting images captions to text. Image by \href{https://www.flickr.com/photos/francisvallance/}{Francis Vallance (Heritage Warrior)}, used under \href{https://creativecommons.org/licenses/by/2.0/}{CC BY 2.0 license}.}
 	\label{fig:image-captioning}
 \end{figure}
 
-In addition to the aforementioned application of image captioning to help the visually impaired, there are many other use cases in which automatic image descriptions may help. In general, any domain in which images need to be interpreted by humans, but human availability is scarce or it is a tedious task, may benefit from an automated approach to image description.
+In addition to the aforementioned application of image captioning to help the visually impaired, there are many other use cases in which automatic image descriptions may help. Generally speaking, any domain in which images need to be interpreted by humans, but human availability is scarce, or the task at hand is tedious, may surely benefit from algorithms able to automatically generate textual image descriptions.
 
-A specific use case is the analysis and extraction of information from videos. Some video monitoring tasks are very boring and tedious. An automated mechanism to describe scenes in video footage will be of great utility for creating summaries or monitoring specific situations and events. \footnote{As an interesting example, Shell is conducting a pilot study using deep-learning to automatically monitor video footage in order to identify safety hazards and generate alerts (\href{https://customers.microsoft.com/en-us/story/shell-mining-oil-gas-azure-databricks}{link})}.
+A vast area of application is that of \textbf{Concept-Based Image Retrieval}. This kind of task, also named as "description-based" or "text-based" image indexing/retrieval, refers to retrieval from text-based indexing of images that may employ keywords, subject headings, captions, or natural language text. The main problem with this approach to image retrieval is the scarcity of image descriptions, since having humans manually annotate images by entering keywords or descriptions in a large database can be very tedious and time consuming \footnote{This is one of the reasons explaining the upswing of \textit{Content-Based Image Retrieval}, which uses content derived from the visual properties of the image, like color, textures and shape, instead of semantic and descriptive data such as keywords and captions}.  Therefore, automatic image description may be of great utility, and it can be applied to many areas requiring image indexing and retrieval, such as biomedicine, education, digital libraries, etc., as well as general web search. In addition to automate the annotation of images, there is an extra benefit in using captions vs keywords: image captions are semantically richer and more sophisticated, thus allowing for more complex queries to improve the precision of the search.
 
-Another potential utility of automatic image description lies in the task of searching images. Having automatically generated captions for images that originally hasn't been described, would help finding images based on a complex description rather that a simple collection of tags.
+Another area where automatic image captioning may be of great utility is the analysis and extraction of information from videos. Some video monitoring tasks are very boring and tedious. An automated mechanism to describe scenes in video footage will be of great utility for creating summaries or monitoring specific situations and events. \footnote{As an interesting example, Shell is conducting a pilot study using deep-learning to automatically monitor video footage in order to identify safety hazards and generate alerts (\href{https://customers.microsoft.com/en-us/story/shell-mining-oil-gas-azure-databricks}{link})}.
+
+Automatic image description can also be used to improve image indexing with, since they provide a more sophisticated and semantically rich description that image classification or simple image tagging. This kind of semantic indexes would be very very useful for any kind of Content-Based Image Retrieval application, which would help improve any king of Content-Based Image Retrieval. This kind of Having images automatically generated captions for images that originally hasn't been described, would help finding images based on a complex description rather that a simple collection of tags. This is some
 
 \section{Goals}
 
@@ -36,7 +38,7 @@ This project aims at advancing in the task of automatically generating image des
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.6\textwidth]{figs/ch1/conceptual-captions-example.png}
+	\includegraphics[scale=0.5]{ch1/conceptual-captions-example.png}
 	\caption{Illustration of images and captions in the Conceptual Captions dataset.Clockwise from top left, images by Jonny Hunter, SigNote Cloud, Tony Hisgett, ResoluteSupportMedia. All images used under \href{https://creativecommons.org/licenses/by/2.0/}{CC BY 2.0 license}.}
 	\label{fig:conceptual-captions}
 \end{figure}
@@ -53,7 +55,7 @@ Figure \ref{fig:crisp-dm} depicts the relationships between the different phases
 
 \begin{figure}[hpt]
 	\centering
-	\includegraphics[width=0.6\textwidth]{figs/ch1/crisp-dm.png}
+	\includegraphics[scale=0.25]{ch1/crisp-dm.png}
 	\caption{Process diagram showing the relationship between the different phases of CRISP-DM. Image by Kenneth Jensen, used under \href{https://creativecommons.org/licenses/by/2.0/}{CC BY-SA 3.0 license..}}
 	\label{fig:crisp-dm}
 \end{figure}

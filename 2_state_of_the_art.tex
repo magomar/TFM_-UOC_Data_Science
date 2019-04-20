@@ -29,6 +29,7 @@ Intuitively, descriptions should be easy to understand by a person, and that per
 Since 2011 there have been a considerable advance in challenging CV tasks, to a great extent fostered by the application of deep learning models and the availability of large corpus of data available to researchers. More recently, a similar process seems to be occurring in the NLP field. Not surprisingly, these advances in both CV and NLP have also propelled a new wave of interest in cross-disciplinary research problems involving both areas of research, and automatic image description is a very good example. As a consequence, the CV and NLP communities have increased cooperation, for example by organizing joint workshops over the past few years. These efforts have resulted in a surge of new models, datasets and evaluation measures, which is reflected in the increase of publications, specially from 2014. 
 
 In order of ease of review, understanding and comparison of the growing amount of research on the topic, existing surveys have proposed various schemes to classify the models being used.
+
 One the one hand, the survey by \citet{Bernardi2017} proposes a classification system based on two dimensions and only tree categories. On the other hand, \citet{Bai2018} organize the existing research according to the kind of architecture or framework used, resulting in a more fine grained classification with 8 categories. 
 
 After comparing both both approaches to classify the existing research, we  prefer the approach adopted by \citet{Bai2018} as we consider it more precise and descriptive,  resulting in a finer granularity; while the classification by \cite{Bernardi2017} is more abstract, resulting in a coarser granularity. A more recent survey by \citet{Hossain2019} takes the same approach found in \citep{Bai2018} with a more focused review of deep-learning based models and references to the most recent work published so far.
@@ -43,9 +44,10 @@ Below we provide a short overview of the publications covered in this survey org
         \hline
         Retrieval-based & \citet{Farhadi2010, Ordonez2011, Gupta2012, Kuznetsova2012, Hodosh2013a, Kuznetsova2014, Mason2015, Hodosh2013b}\\
         Template-based &  \citet{Yang2011, Kulkarni2011, Li2011, Mitchell2012, Ushiku2015}\\
-        Earlier Deep Models &  \citet{Socher2014, Karpathy2014, Ma2016, Yan2015, Lebret2015a}\\
+        Earlier Deep Models &  \citet{Socher2014, Karpathy2014, Ma2015, Yan2015, Lebret2015a, Yagcioglu2015}\\
         Multimodal learning & \citet{Kiros2014a, Mao2015a, Karpathy2015, Chen2015}\\
-        Compositional architectures & \citet{Fang2015, Tran2016, Ma2016, Oruganti2016, Wang2016, Fu2017},\\
+        Encode-Decoder framework & \citet{Kiros2014b, Vinyals2015, Donahue2015, Jia2015, Wu2015, Pu2016b}\\ 
+        Compositional architectures & \citet{Fang2015, Tran2016, Ma2016, Oruganti2016, Wang2016, Jin2015}\\
         Attention-guided & \citet{Xu2015, You2016, Yang2016, Zhou2017, Cao2019, He2019}\\
         Describing novel objects & \citet{Mao2015b, Hendricks2016} 
     \end{tabular}
@@ -53,9 +55,9 @@ Below we provide a short overview of the publications covered in this survey org
 
 \section{Approaches without deep learning}
 
-\subsection{Retrieval-based approaches}
+\subsection{Retrieval-based}
 
-Early work on the topic was often based in the use of retrieval-based approaches. These approaches usually follow a two steps process. During the first step, given a query image, a candidate set of similar images is retrieved using content-based image retrieval techniques, which are based on global image features extracted from the image. During the second step, a re-ranking of the retrieved images is computed using a variety of methods. Finally, the caption of the top image is returned, or a new caption is composed from the captions of the top-n ranked images.
+Early work on the topic was often based in the use of retrieval-based approaches, also referred to as transfer-based approaches. These approaches usually follow a two steps process. During the first step, given a query image, a candidate set of similar images is retrieved using content-based image retrieval techniques, which are based on global image features extracted from the image. During the second step, a re-ranking of the retrieved images is computed using a variety of methods. Finally, the caption of the top image is returned, or a new caption is composed from the captions of the top-n ranked images.
 
 \citet{Farhadi2010} use a meaning space consisting of \textit{<object, action, scene>} triplets to link images and sentences. Their model takes an input image, map it into the meaning space by solving a Markov Random Field, and use Lin's information-based similarity measure \citep{Lin1998} to determine the semantic distance between the query image and the pool of available captions. Finally, the semantically closest sentence is used as the image description.
 
@@ -88,7 +90,7 @@ An detailed analysis of the literature reviewed here reveals at least two dimens
 
 The main disadvantage of Retrieval-Based approaches comes from its reuse of existing images. The sentences used to describe images in the past may be completely inadequate for describing a new image. Although some of the proposed models are able to compose new sentences rather than just returning one of the stored sentences, these are still based on previously used sentences, so the result may still be unsuited for describing the query image. This limitation was specially evident with the use of small datasets, therefore, perhaps the problem would be alleviated with the use of very large datasets as the ones that have appeared recently \citet{Lin2014, Sharma2018}.
 
-\section{Template-based approaches}
+\subsection{Template-based approaches}
 
 Another group of early attempts to solve the automatic image captioning problem take some kind of template-based approach. Unlike retrieval based approaches, template-based approaches analyze the query image to generate concepts, and then use some kind of constraining mechanism to compose a sentence. The constrains typically adopt the form of a template, but can also be specified as grammar rules.
 
@@ -114,11 +116,15 @@ Recent advances in the field have been achieved with the introduction of new arc
 
 Encourage by the success of CNNs to solve image classification tasks, researchers began incorporating deep models into their image captioning methods, yet still influenced by the retrieval-based and template-based methods. Image captioning was formulated as a multi-modality embedding \citet{Frome2013} and ranking problem.
 
-\citet{Socher2014} use dependency-tree recursive neural networks (DT-RNN) to represent phrases and sentences as compositional vectors. Another deep neural network \citep{Le2011} is used to extract visual features from the images. Both types of  features are mapped into a common space by using a max-margin objective function. After training, sentence retrieval is performed based on similarities between representations of images and sentences in the common space.
+\citet{Socher2014} use dependency-tree recursive neural networks (DT-RNN) to represent phrases and sentences as compositional vectors. Another deep neural network \citep{Le2013} is used to extract visual features from the images. Both types of  features are mapped into a common space by using a max-margin objective function. After training, sentence retrieval is performed based on similarities between representations of images and sentences in the common space.
 
 \citet{Karpathy2014} introduce a twist in the previous model by working at a finer level, that is, instead of modelling full images, they work on a finer level by embedding fragments of images as well as fragments of sentences fragments into a common space.  An structured max-margin objective is used to explicitly associate these fragments across modalities. Image fragments are obtained by means of a Region CNN \citep{Girshick2014}. Sentence fragments are modelled as typed dependency tree relations \citep{DeMarneffe2006}. At last, a retrieval task is performed by computing image-sentence similarities that combine both a global term and a fragment-aligned term. Experimental evaluation showed that reasoning on both the global level of images and sentences and the finer level of their respective fragments improves performance on the image-sentence retrieval task.
 
 \citet{Ma2015} take into consideration different levels of interaction between images and sentences in order to compute similarities. Their architecture combines two different deep neural networks to tackle the multimodal space: an image encoding CNN \citep{Simonyan2015} to encode visual data, and a matching CNN \citep{Hu2014} to learn the joint representation of images and sentences. The matching CNN composes words to different semantic fragments and learns the inter-modal relations between image and the composed fragments at different levels. The authors provide experimental results on benchmark databases for bidirectional image-sentence retrieval.
+
+\citet{Yagcioglu2015} propose a query expansion approach for improving transfer-based automatic image captioning. The core idea of this method is to translate the given visual query into a distributional semantics based form, which is generated by the average of the sentence vectors extracted from the captions of images visually similar to the input image. It is a data-driven approach, that extracts image features using the Caffe architecture \citep{Jia2014}, a Region-CNN pipeline trained on the ImageNet dataset. The original query is expanded as the average of the distributed representations of the captions associated with the retrieved descriptions \citep{Mikolov2013}, weighted by their similarity . Finally, they transfer the closest caption as the description of the input image.
+
+\citet{Devlin2015} also utilizes CNN activations as the global image descriptor, and perform k-NN retrieve images in the training set that are similar to the query image. Then their model selects a description from the candidate descriptions associated with the retrieved, just like the approaches by \citet{Mason2015} and \citet{Yagcioglu2015}. Their approach differs in terms of how they represent the similarity between description and how they select the best candidate over the whole set. Specifically, they propose to compute the description similarity based on the \textit{n-gram} overlap \textit{F-score} between the descriptions. The model returns the description with the highest mean n-gram overlap with the other candidate descriptions, that is the one associated to the k-NN centroid.
 
 \subsection{Multimodal learning}
 
@@ -133,17 +139,19 @@ Retrieval-based and template-based methods to image captioning impose limitation
 
 General structure of multimodal neural-based learning is shown in \ref{fig:multimodal}. First, image features are extracted using a feature extractor, typically a CNN. Then, the extracted features are forwarded to a neural-based model, which maps the image features into a common space with the word features. Finally, the model predicates new words based on the image feature and previously generated context words.
 
-\citet{Kiros2014a} introduce two \textit{multimodal neural language models}: models of natural language that can be conditioned on other modalities. An image-text multimodal neural language model can be used to retrieve images given complex sentence queries, retrieve phrase descriptions given image queries, as well as generate text conditioned on images. The models used are adaptations of the log-bilinear language model proposed by \citep{Mnih2007}. In the case of image-text modelling it is possible to jointly learn word representations and image features by training the models together with a CNN. These models can be used for generating captions as well retrieval
+\citet{Kiros2014a} use a CNN for extracting image features using a multimodal space that jointly represents image and text. The key to achieve that is the use of Multimodal Neural Language Models (MNLM), that is, models of natural language that can be conditioned on other modalities. An image-text multimodal neural language model can be used to retrieve images given complex sentence queries, retrieve phrase descriptions given image queries, as well as generate text conditioned on images. The authors introduce two such languages that are adaptations of the Log-Bilinear Language Model proposed by \citep{Mnih2007}. In the case of image-text modelling it is possible to jointly learn word representations and image features by training the models together with a CNN like AlexNet \citep{Krizhevsky2012}.
 
 \citet{Mao2014, Mao2015a} present a multimodal Recurrent Neural Network (m-RNN) model for generating novel image captions. It directly models the probability distribution of generating a word given previous words and an image, and uses this distribution to generate image captions. The model consists of two sub-networks: a deep RNN for sentences and a deep CNN for images. These two sub-networks interact with each other in a multimodal layer to form the whole m-RNN model. Besides generating captions, the m-RNN model can be applied for retrieving images or sentences. This model achieved state of art results across image captioning and image and caption retrieval tasks.
 
-\citet{Karpathy2015} present a model that generates natural language descriptions of images and their regions by learning about the inter-modal correspondences between language and visual data. This model is based on a novel combination of CNN over image regions, bidirectional RNN over sentences, and a structured objective that aligns the two modalities through a multimodal embedding. The resulting Multimodal RNN architecture learns to generate novel descriptions of image regions. This model outperformed retrieval baselines on both full images and on a new dataset of region-level annotations derived from the MSCOCO dataset.
+\citet{Karpathy2015} propose another multimodal approach using deep neural networks to learn embedding of image and natural language data for the task of bidirectional images and sentences retrieval. However, unlike previous methods that embed full images and sentences, this method works at a finer level, by working with fragments of images and fragments of sentences. This method applies Region-CNN to break down image into a number of objects, RNN over sentences, represented by a dependency tree relations (DTR) \citep{DeMarneffe2006},and a structured objective that aligns the two modalities through a multimodal embedding. The resulting Multimodal RNN architecture learns to generate novel descriptions of image regions. This model outperformed retrieval baselines on full images as well as images annotated with region-level sentences, which were derived from the MSCOCO dataset.
  
 \citet{Chen2015} also explore the bi-directional mapping between images and their textual descriptions. This approach uses a RNN that attempts to dynamically build a visual representation of the scene as a caption is being generated or read. The representation automatically learns to remember long-term visual concepts. This model is capable of both generating novel captions given an image, and reconstructing visual features given an image description. The model was tested on several tasks, including sentence generation, sentence retrieval and image retrieval, and achieved state-of-the-art results for the task of generating novel image descriptions. The results for the image and sentence retrieval tasks were comparable to state-of-the-art methods using similar visual features.
 
+In general, the multimodal approaches have limitations to handle a large amount of data and are inefficient to work with long term memory.
+
 \subsection{Encoder-Decoder framework}
 
-Inspired by recent advances in neural machine translation, the encoder-decoder framework has also been applied with great success for generating image captions. General structure
+The encoder-decoder framework was originally designed to translate sentences between different languages \citep{Kalchbrenner2013, Sutskever2014, Cho2014}. Inspired by its success solving translation problems, some researchers have adopted them to generate image captions with great success. The idea behind adapting this framework designed for translation tasks, was to see the image captioning tasks also as translation problem but across different modalities. 
 
 \begin{figure}[hpt]
 	\centering
@@ -152,7 +160,25 @@ Inspired by recent advances in neural machine translation, the encoder-decoder f
 	\label{fig:encoder-decoder}
 \end{figure}
 
-\subsection{Attention guided}
+\citet{Kiros2014b} were the first to apply the encoder–decoder framework to generate image descriptions by unifying joint image-text embedding models and multimodal neural language models. The idea is that given an image input, a sentence output can be generated word by word, like in language translation. Their model uses a Long Short-Term Memory (LSTM) \citep{Hochreiter1997} to encode textual data, and a CNN to encode visual data. Then, by optimizing a pairwise ranking loss, encoded visual data is projected into an embedding space spanned by LSTM  hidden states that encode textual data. In the embedding space, a multimodal neural language model --called Structure-Content Neural Language Model (SC-NLM)-- is used to decode the visual features conditioned on context word feature vectors, thus allowing for word-by-word generation of a sentence. This method achieved significant improvements in generating realistic image captions over the multimodal neural language models proposed in \citep{Kiros2014a}.
+
+\citet{Vinyals2015} propose a method similar to the one by \citet{Kiros2014a}, which uses a CNN for image representations and an LSTM for generating image captions. This method, referred trains the LSTM based on maximum likelihood estimation. The LSTM works as follows: (1) image information is included into the initial state of the LSTM; (2)next words are generated based on the current time step and the previous hidden state; (3) this process continues until it gets the end token of the sentence. 
+
+A problem with the former encoder-decoder methods is their susceptibility to the vanishing gradient problem, due to  image information being fed only at the beginning of the process. Consequently, the role of the initial words is also becoming weaker and weaker as the process continues. Therefore, the captions tend to degrade in relevance when generating long sentences. With the aim of mitigating this problem, \citet{Donahue2015} introduce a variation into the encoder-decoder architecture that stacks multiple LSTM atop one another. Rather than projecting the vision space into the embedding space of the hidden states at the initial stage, this model takes a copy of the static image and the previous word directly as input, that is then fed to the stack of LSTMs at each time step. This architecture, referred to as the Long-term Recurrent Convolutional Network (LRCN) model, is able to process not just static images, but also dynamic tasks involving sequences, like videos.
+
+Still playing around with the encoder-decoder framework, some researchers propose methods to augment it by including high level semantic concepts explicitly. 
+
+\citet{Jia2015} propose an extension of the LSTM model, which they call guided LSTM of gLSTM for short. This model adds semantic information from the image, and this information is included as extra input to each gate and cell state of the LSTM network, with the aim of guiding the model towards more relevant solutions, specially when generating long sentences. Semantic information is extracted in different ways. One way is by means of a cross-modal retrieval task that first retrieves image captions and then extracts semantic information from these captions Another way is by using a multimodal embedding space. Besides, this work explores different length normalization strategies for beam search to avoid bias towards short sentences, obtaining results that are on par with or better than the current state-of-the-art.
+
+\citet{Wu2015} also incorporate high-level semantic concepts into the encoder–decoder framework in the form of attribute probabilities. To this end, the authors first mined a set of semantic attributes based on words commonly found in image captions. Second, they trained a multi-label classifier using one CNN per attribute, to predict the probability of attributes being present in the image. The trained CNNs are used to create a vector for each image that represents the probability of each attribute being present in it. For the caption generation, prediction vector is passed to an LSTM. For different tasks, different language models may be used, and specifically, for image captioning they adopt the region-based multi-modal language model by \citet{Vinyals2015}. The model is also capable to incorporate external semantic information and doing so further improves performance.
+
+A circumstance that may limit the practical application of the majority of approaches discusses so far will occur when the availability of captions is limited to just a fraction of the available images. In that case, a semi-supervised learning approach would be of significant practical values. With that situation in mind, \citet{Pu2016b} propose a semi-supervised learning method under the encoder–decoder framework. This method uses a Deep Generative Deconvolutional Network (DGDN) \citep{Pu2016a} as a decoder of the latent image features, and a deep CNN as an image encoder; the CNN is used to approximate a distribution for the latent DGDN features. The latent features are also linked to generative models of captions by RNN. To generate captions for new images, averaging is performed across the distribution of latent features. This framework is capable of modeling the image in the absence of associated captions, thus this is semi-supervised setting for CNN learning with images. 
+
+\citet{Hao2018} propose a new approach that is also based on the popular encoder-decoder architecture, but uses the recently proposed densely convolutional neural network (DenseNet) as encoder, to extract the feature maps. Meanwhile, the decoder uses an LSTM to parse the feature maps and converse them into textual descriptions. This model predicts the next word in the description by taking the effective combination of feature maps with word embedding of current input word by a visual attention switch.
+
+\subsection{Attention-guided models}
+
+Image captions should be kept short but informative. Therefore, such descriptions should mention only the most salient elements of the image, and avoid small details. Motivated by the visual attention mechanism of primates and humans \citep{Rensink2000, Spratling2004} , approaches that utilize attention to guide image description generation are proposed. By incorporating attention to the encoder–decoder framework, sentence generation will be conditioned on hidden states that are computed based on attention mechanism. General structure of attention guided image captioning methods is given \ref{fig:attention-based} . In such methods, attention mechanism based on various kinds of cues from the input image are incorporated to make the decoding process focus on certain aspects of the input image during the caption generation process.
 
 \begin{figure}[hpt]
 	\centering
@@ -161,7 +187,37 @@ Inspired by recent advances in neural machine translation, the encoder-decoder f
 	\label{fig:attention-based}
 \end{figure}
 
+Encouraged by successes of other tasks that employ attention mechanism \citet{Mnih2014, LeiBa2015}, \citet{Xu2015} were the first to introduce an attention-mechanism to the problem of automatic image captioning. Their model, which is a variation of the encoder-decoder framework, is capable of dynamically attending salient image regions while generating the description of the image. While most approaches based on CNN image encoders use the top layer of the ConvNet for extracting image features, this method generates context vectors by using the features learned at lower layers of the ConvNet. The idea behind this approach is that the use of the top layer may result in the loss of details which may actually be useful for generating image descriptions. \citeauthor{Xu2015} have tried two different techniques for simulating attentions: stochastic hard attention and deterministic soft attention.
+
+It is possible to classify many of the methods used in image captioning as either bottom-up or top-down. In the top-down paradigm \citep{Donahue2015, Karpathy2015, Chen2015, Mao2015a, Mao2015b, Vinyals2015,Xu2015} visual features are extracted first and used to select or generate a caption. In the bottom-up paradigm \citep{Farhadi2010, Kulkarni2011, Li2011, Kuznetsova2012, Elliott2013, Lebret2015a} visual concepts (e.g., regions, objects, and attributes) are extracted first and combined later to generate a caption. Top-down approaches have difficulties to deal with the fine details of an image. Bottom-up approaches, on the other hand, can operate at any image resolution and therefore are more suited for dealing with  fine details of the image. However, they have problems in formulating an end-to-end process. To take advantage of the complimentary properties of both approaches, \citet{You2016} propose a semantic attention-based method that is designed to provide a detailed, coherent description of semantically important objects. On the one hand, the visual concepts are collected using K-NN image retrieval for computing global --non-parametric-- visual concepts, and a fully convolutional network (FCN) \citep{Long2015} is trained to predict region attributes. With each attribute corresponding to one entry of the used vocabulary, words and image attributes share the same vocabulary. Under the encoder–decoder framework, the visual concepts are only forwarded to the encoder at the initial step. In the decoding stage, an LSTM is applied to decode the image features using both the global visual concepts, and the local attributes. The LSTM decoder uses two attention functions to generate words: an output attention function that modulates attribute attention based on the hidden state of the LSTM, together with an input feedback mechanism that modulates attribute attention based on the previous word generated. Compared with the method introduced by \citet{Xu2015}, which works on fixed and predefined spatial location, this semantic attention-based method can work on any resolution and any location of the image.
+
+Arguing that attention-enriched encoder–decoder models lack global modelling abilities due to their sequential information processing, \citet{Yang2016} propose a new model called review network, which results of augmenting the encoder–decoder framework with a review module. The review network is generic and can enhance any existing encoder-decoder model.
+This model performs a number of review steps with attention mechanism on the encoder hidden states, and outputs a thought vector after each review step. These thought vectors are introduced to capture the global properties of the image in a compact vector representation that is used as the input of the attention mechanism in the decoder. For example, the first review step can review what are the objects in the image?, then it can review the relative positions of the objects, and another review can extract the information of the overall context of the image. Another role for the thought vectors is as a focus for multitask learning.
+
+\citet{Pedersoli2017} propose an area based attention mechanism for image captioning. Previous attention based methods map image regions only to the hidden state of the RNN language model. This approach, however, allows a direct association between caption words and image regions by modeling the dependencies between between image regions, caption words, and the hidden states. This associates makes the model capable of predicting the next word as well as corresponding image regions in each time-step. Another contribution of this work is the introduction of spatial transformation networks that allow for image-specific attention areas (while previous attention mechanisms used CNN activation grids, object proposals), and can be trained jointly with the rest of the network. This combination of techniques together yield state-of-the-art results on the MSCOCO dataset.
+
+\citet{Lu2017} proposed another attention-based mechanism for image captioning using a visual sentinel. Other attention-based methods focus on the image in every time step of the recurrent neural network. However, in practice there are some words that do not need visual information (e.g. some prepositions and articles), thus applying attention to the image in these steps may be misleading and diminish the overall effectiveness of the caption generation process. To deal with this drawback, \citeauthor{Lu2017} introduce an adaptive mechanism to dynamically determine when to look at the image, and when to relay just on the language model to generate the next word. The proposed model combines a new spatial model that is able to determine where to look and a sentinel gate, which determines when to look at the image. The adaptive attention mechanism is introduced as an extension of the decoder LSTM that generates "visual sentinel" vectors (instead of just a hidden state) fallback option for the decoder. The "sentinel gate" is responsible of deciding whether to look at the image and how much information to get from it, or on the contrary, whether to relay on the visual sentinel for the caption generation process.
+
+As we have seen, various attention mechanisms have successfully been added to deep models for improving the generation of image captions. These deep models learn dynamic weightings of the input vectors, which allow for more flexibility and expressive power than other models. Attention maps between the language space and the and language space are supposed to contain relevant information that could be useful in understanding and improving deep learning models in problems involving image and natural language, such as the image captioning problem. 
+
+With the aim of advancing in the understanding and utility of attention mechanisms in image captioning, \citet{Liu2017a} propose a quantitative method to evaluate the correctness of attention maps, which is defined as the consistency between attention maps and the corresponding regions that the words/phrases describe in the image. More specifically, \citeauthor{Liu2017a} use the alignment annotations between image regions and noun phrase caption entities provided in the Flickr30k Entities dataset \citep{Plummer2015} as  ground truth maps. Using that metric, the attention-based model by \citet{Xu2015} performs better than the uniform attention baseline, but still has room for improvement in terms of attention consistency with human annotations. To improve the quality of attention maps, the authors propose the use of supervised attention, with two types of supervision: strong supervision with alignment annotation, and weak supervision with semantic labelling. In experiments, the method shows that supervised attention model performs better in mapping attention as well as image captioning tasks.
+
+\citet{Chen2017} argue that existing visual attention based solely on spatial features have some drawbacks. To begin with, these methods compute weighted pooling only on attentive feature maps, which results in a gradual lose of spatial information. Moreover, these methods use the spatial information from the last convolution layer of the CNN, whose receptive fields correspond to very large regions, with very narrow gaps between regions; therefore, they do not get significant spatial attentions for an image. To deal with these limitations, \citeauthor{Chen2017} propose a method that combines both an spatial attention mechanism with a channel-wise attention mechanism. The new method, named SCA-CNN, extracts features not just from spatial locations, but also from different channels and multiple layers of the CNN. In addition, each filter of a convolutional layer acts as semantic detector \citep{Zeiler2014} while other methods use external sources for obtaining semantic information. In the task of image captioning, SCA-CNN dynamically modulates the sentence generation context in multi-layer feature maps, encoding where (i.e., attentive spatial locations at multiple layers) and what (i.e., attentive channels) the visual attention is.  This methods outperformed state-of-art visual attention-based image captioning methods across the classical datasets (Flickr30K and MSCOCO).
+
+To bridge the gap between humans and machines in image understanding and describing, \citet{Tavakoliy2017} study the agreement between bottom-up saliency-based visual attention and object referrals in scene description constructs. As a result of the study, \citeauthor{Tavakoliy2017} propose a saliency-boosted image captioning model that investigates possible benefits from low-level cues in language models. There are two main conclusions of the study: first, that humans mention more salient objects earlier than less salient ones in their descriptions; and second, the better a captioning model performs, the better attention agreement it has with human-generated descriptions. The authors found that the proposed saliency-boosted model does not improve significantly when the task is well learnt, but they observer a better generalization of their model when applied on on unseen data.
+
+Top-down attention-mechanisms for building visual attention maps typically focus on some selective regions obtained from the output of one or two layers of a CNN. The input regions are of the same size and have the same shape of receptive field. \citet{Anderson2018} argue that this approach has little consideration for the content  of the image and propose a new method inspired by the human visual system. Recent studies on human attention \citep{Buschman2007} indicate that human attention can be focused volitionally by top-down signals determined by the task at hand (e.g., looking for something), and automatically by bottom-up signals associated with unexpected, novel or salient stimuli. In the model proposed by \citeauthor{Anderson2018} a top-down mechanism based on Faster R-CNN \citet{Ren2015} proposes image regions, each with an associated feature vector, while a top-down mechanism determines feature weightings. Therefore, this method can attend both object level regions as well as other salient image regions. 
+
 \subsection{Compositional architectures}
+
+Most of the neural methods for image captioning described in the previous sections are end-to-end systems made of tightly coupled modules whose parameters are trained jointly. An alternative architectonic approach to build such systems is based on the notion of compositional architectures, which consist of independent, loosely coupled components connected through a pipeline, where each component provides data to the next component until a final result is obtained. The idea behind this architecture is to make modular systems where it is easier to reuse existing components and replace components with little effort.
+
+General structure of compositional image captioning methods is depicted in Figure \ref{fig:compositional}. Usually, there are three components: 
+\begin{enumerate}
+\item A visual model that obtains visual features from the query image.
+\item A natural language model that generates captions for the extracted features
+\item A ranking module that re-ranks generated captions using a multimodal similarity model.
+\end{enumerate}
 
 \begin{figure}[hpt]
 	\centering
@@ -170,22 +226,233 @@ Inspired by recent advances in neural machine translation, the encoder-decoder f
 	\label{fig:compositional}
 \end{figure}
 
-\subsection{Benchmark datasets and evaluation metrics}
+\citet{Fang2015} describe a system that consists of three models: visual detectors, language models and multimodal similarity models. The training process consists of two steps: First, a vocabulary of words that are most common in the training captions. Second, a visual detector is trained for each word in the vocabulary using multiple instance learning  \citep{Viola2005}. Once trained, the system can be used to generate image captions: A CNN \citep{Krizhevsky2012} is used to obtain visual features expressed as words learned vocabulary, then a maximum entropy language model \citep{Berger1996} is applied to generate candidate captions conditioned on those features. During this process, left-to-right beam search \citep{Ratnaparkhi2000} with a stack of pre-specified length $l$, produces $l$ candidate descriptions. Finally, a deep multimodal similarity model, which maps images and text fragments into a common space for similarity measurement, is used to re-rank the candidate descriptions and select the top one.
 
-\section{Datasets}
+\citet{Jin2015} introduce an approach that aims at exploiting the parallel structures between images and sentences. In this model, the generation of the next word is aligned with the visual perception experience, where the attention shifting among the visual regions imposes a thread of visual ordering. In addition, this method uses high-level semantic information in the form of scene-specific contexts. This method works as follows: First, selective search \citep{Uijlings2013} is applied to construct a hierarchical segmentation of the image containing image regions/patches at different scales. Second, a small number of regions are selected for further processing based on the criterion of being semantically meaningful, non-compositional and contextually rich. Next, visual features are extracted from regions using a deep CNN. The sentence generation process is guided by an attention-based multi-modal LSTM decoder. The visual attention mechanism is inspired by the model described in \citep{Xu2015}, but it is enriched with information representing the scene-specific context. This information is modeled as scene vectors obtained by Latent Dirichlet Allocation (LDA) \citep{Blei2003} and a multilayer perceptron.
 
-Pascal1K \citet{Rashtchian2010}
+Taking on the same architecture introduced by \citet{Fang2015}, \citet{Tran2016} present a system specialized in describing landmarks and celebrities. However, instead of a CNN for the visual feature detector, this model uses a deep residual network (ResNet) to detect a broader range of visual concepts \cite{He2016a}, a maximum entropy language model for candidate description generation, and a deep multimodal similarity model for caption ranking. 
 
-VLT2K \cite{Elliott2013}
+\citet{Ma2016} propose another method using a compositional architecture. Their main contribution is the introduction of structural words; tetrads composed of <objects, attributes, activities, scenes>. The method consists of two stages: structural word generation and sentence translation. At the first stage, multi-layer optimization is applied to generate a hierarchy of concepts that will play the role of structural words. During the second stage, an LSTM is used to translate the structural words into full sentences.
 
-Flickr8K \citet{Hodosh2015}
+Realizing the high specialization of most approaches to multi-modal learning problems, \citet{Oruganti2016} introduce a more general approach called the Fusion-based Recurrent Multi-Modal (FRMM) model. This model is made of three independent components: one component per modality, and a fusion stage. Each modality is learned in a separate stage, and then their outputs are mapped to a shared representation. Finally, the fusion generates an output based on the associations between modalities it has previously learned. This approach provides the FRMM architecture increased flexibility over previous approaches in accommodating disparate inputs. The architecture for each stage might be different depending on the modalities involved, ensuring that the overall architecture is highly adaptable. The FRMM model is designed work with multi-modal applications in which at least one of the modalities has a temporal or sequential nature. Some examples include image description, sentiment analysis and language translation. Furthermore, two variations of the FRMM architecture are proposed according to the lengths of the inputs in each modalitt: Aligned FRMM (AFRMM) when the length is the same, and Unaligned FRMMM (UFRMM) otherwise. For image description in particular, the authors have tested various FRMMM, both Aligned and Unaligned. The image stage can use either a fully connected layer or a LSTM on top of a CNN, while the language stage and fusion stage use a LSTM network. Experiments across various configurations show that the AFRMM model achieves the best results for still image datasets like MSCOCO. Actually, the authors achieved state-of-art results for MSCOCO, but not for smaller datasets like Flickr30K, probably because it needs to learn more parameters than other models. 
+\citet{Wang2016} propose a parallel version of the compositional architecture with the goal of taking advantage of the complementary properties of simple RNNs one the one hand, and LSTMs networks on the other hand. There is a visual stage using CNN, as many other approaches, as well as a language generator and a fusion step. The contribution of this work lies in the parallelization of the generation and fusion stages, which consists in dividing the hidden units of the RNN into several same-size parts, and letting them work in parallel. Then, their outputs are merged with corresponding ratios for word predication. This parallelization allows for the use of different types of hidden units to combine their strengths. Specifically, the authors have used various configurations of simple RNN and LSTM. Experimental results showed a reduction in resource consumption accompanied with a simultaneous improvement in performance, compared with the dominated models (models using just one type of hidden units, either simple RNN or LSTM).
 
-Flickr30K \cite{Young2014}
+\subsubsection{Describing novel objects}
 
-IAPTR-TC12 \cite{Grubinger2006}
+The image captioning methods described so far are limited to predefined vocabularies, that is, these methods are unable to generate descriptions for novel objects, objects that are not associated to any of the concepts represented in the training data (image-sentence pairs). However, humans have the ability to recognize, learn and use novel concepts in various visual understanding tasks. In practical image description applications, it is quite possible to come across situations where there are novel objects which are not included in the vocabulary learned by the model, and would be very costly to retrain the system every time a new concept appears. In this section, we describe some attempts to deal with novelties in image captioning. 
 
-MSCOCO \citet{Lin2014}
+In order to learn novel visual concepts without retraining the whole system, \citet{Mao2015b} propose a method that uses just a few images with sentence descriptions. This method is able to hypothesize the semantic meaning of new words and add them to its dictionary for future use. In order to implement and test this method, the authors have modified their previous model \citep{Mao2015a} to make it more suitable for the novel concept learning task. On the one hand, a transposed weight sharing strategy is applied to reduce the number of parameters, which in turn makes the model less prone to overfitting the new concepts. Second, an LSTM network replaces the simple RNN to avoid the gradient explosion and vanishing problem. 
 
-Conceptual Captions \cite{Sharma2018}
+Another approach to make image captioning capable of describing novel objects is the Deep Compositional Captioner (DCC), by \citet{Hendricks2016}. The DCC achieves this goal by leveraging large object recognition datasets and external text corpora, and by transferring knowledge between semantically similar concepts. First, a lexical classifier and a language model are trained over image datasets and text corpora, respectively. Then, a multimodal caption model is trained to integrate the lexical classifier and the language model using linear combinations of affine transformations of image and language features. This model enables the transfer of semantic knowledge between the two modalities, which allows generating descriptions for novel objects and their interactions with other objects. The proposed system has been empirically evaluated its performance on MSCOCO and ImageNet with objects for which no paired image-sentence pairs existed. Furthermore, this approach have extended to describe objects in video clips
 
-\section{Evaluation metrics}
+% \subsubsection{Other}
+
+% Very often, images posted in social media networks lack a proper description. In order to generate captions for these images, \citet{Park2017} propose a new method based on personalized views (who publishes an image) that is able to predict hashtags and generate image captions. This method uses a Context Sequence Memory Network (CSMN) to obtain the context information for a newly posted image. The proposed method exploits memory as a repository for multiple types of context information, captures long-term information without suffering from the vanishing gradient problem, and adopts CNN to jointly represent nearby ordered memory slots for better context understanding.
+
+% Gaze indicates the cognition and perception of humans about a scene. Human gaze can identify the important locations of objects in an image. Thus, gaze mechanisms have already shown their potential performances in eye-based user modeling [18, 35, 109, 122, 124], object localization [100] or recognition [67] and holistic scene understanding [158, 160]. \citet{Sugano2016}claimed that gaze information has not yet been integrated in image captioning methods. This method introduced human gaze with the attention mechanism of deep neural networks in generating image captions. The method incorporates human gaze information into an attention-based LSTM model [152]. For experiments, it uses SALICON dataset [60] and achieves good results.
+
+
+\section{Datasets and evaluation}
+
+There is a wide range of datasets available for automatic image captioning research. The images in these datasets are linked to textual captions, and differ from each other in certain aspects such as in size, the format of the captions, or the procedure used to collect the data. This section presents a brief overview of the common approaches used to collect data, the datasets themselves, and the metrics utilized for model evaluation and benchmarking.
+
+The datasets are summarized in Table \ref{tab:datasets}, and examples of images their corresponding captions are given in Figure \ref{fig:samples}. For a wider survey of datasets in the CV and NLP fields the reader is referred to \citet{Ferraro2015}. That survey is not limited to automatic image description, and provides additional statistics and quality metrics such as perplexity, syntactic complexity, and abstract to concrete word ratios.
+
+Some authors establish a difference between image captions and image descriptions, and in this survey we have actually used them interchangeably. However, such a distinction is relevant when presenting datasets. Image descriptions verbalize what can be seen in the image, i.e., they refer to the objects, actions, and attributes depicted, etc. Captions, on the other hand, typically provide information that cannot be seen in the image or is not evident, such as personal, cultural, or historical context. Images shared through social networks or photo-sharing websites can be accompanied by descriptions or captions, or a mixture of both types of text. The images in a newspaper or a museum will typically contain cultural or historical texts, i.e., captions not 
+
+\subsection{Datasets}
+
+This subsection briefly describes the most popular datasets used in image description tasks, sorted by year of publication.
+
+\begin{table}[hpt]
+    \caption{Summary of benchmark datasets used in automatic image description research}
+    \label{tab:datasets}
+    \begin{tabular}{l | r | c | c | c}
+        Dataset &  Images & Texts & Judgements & Objects \\
+        \hline
+        Pascal1K \citep{Rashtchian2010} & 1K  & 5 & No & Partial \\
+        IAPTR-TC12 \citep{Escalante2010} & 20K  & 1-5  & No & Segmented \\
+        VLT2K \citep{Elliott2013} & 2K  & 3  & Partial & Partial \\
+        Flickr8K \citep{Rashtchian2010} & 8K & 5 & Yes & No \\
+        Abstract Scenes \citep{Zitnick2013} & 10K & 6 & No & Complete \\
+        Flickr30K \citep{Young2014} & >31K  & 5 & No & No \\
+        MSCOCO \citep{Lin2014} & 328K & 5 & Collected & Partial \\
+        Conceptual Captions \citep{Sharma2018}  & 3.3M  & 1  & No & No \\
+    \end{tabular}
+\end{table}
+
+The \textbf{Pascal1K} sentence dataset \citet{Rashtchian2010} consists of 1000 images that were selected from the Pascal 2008 object recognition dataset\footnote{Every year, the Pattern Analysis, Statistical Modeling, and Computational Learning (PASCAL) organization hosts the Visual Object Classes Challenge. In this competition, a new dataset of images with classification and detection information is released, and computer vision researchers compete to create the best classification, detection, and segmentation systems} \citep{Everingham2010}. The dataset covers a wide variety of objects and scenery classified into 20 different categories, such as humans, animals, and vehicles. Each image is associated with five one-sentence descriptions generated by humans using the \textbf{Amazon Mechanical Turk (AMT)}\footnote{Amazon Mechanical Turk (MTurk) is a crowdsourcing marketplace that makes it easier for individuals and businesses to outsource their processes and jobs to a distributed workforce who can perform these tasks virtually. This could include anything from conducting simple data validation and research to more subjective tasks like survey participation, content moderation, and more. See https://www.mturk.com/ \nopagebreak} crowdsourcing service. For the image annotation process, the Turkers (AMT workers) were instructed to focus on the images and describe their contents without considering the context.
+
+The \textbf{IAPR-TC12} dataset \citep{Escalante2010} conatins an image collection consisting of 20k images taken from locations around the world and comprising a varying cross-section of still natural images. They were obtained by guides of an independent travel company and undergo a selection process. The images are accompanied by written descriptions expressed in multiple languages (predominantly English and German). Each image is associated with one to five descriptions, sorted by a certain priority pattern.
+
+The \textbf{Visual and Linguistic Treebank (VLT)}  \citep{Elliott2013} makes use of images from the Pascal 2010 action recognition dataset, augmented with three descriptions of two sentences length per image. These descriptions were collected on the AMT with specific instructions to verbalize the main action depicted in the image and the actors involved (first sentence), as well as the most important background objects (second sentence). There are object annotations available for a subset of 341 images, in the form of polygons around all objects mentioned in the descriptions. Moreover, this subset also includes 3 manually-created Visual Dependency Representations (VDR) per image. 
+
+The \textbf{Flickr8K dataset} \citep{Rashtchian2010} comprises approximately 8k images obtained from the \textit{Flickr} photo-sharing website. The images in this dataset were collected through user queries for specific objects and actions using the AMT. The descriptions consist of 5 sentences per image collected from AMT workers using a strategy similar to that of the Pascal1K dataset. 
+
+The \textbf{SBU Captioned Photo} dataset \citep{Ordonez2011} contains around 1M images harvested from Flickr. It was the first attempt to provide a huge dataset for image captioning tasks, but further analysis showed several issues that severely diminished its utility, like captions containing information that cannot be obtained from the image itself (eg. names of people and location), captions describing just a small detail of the image, or captions consisting being a mere commentary about the image.
+
+The \textbf{Abstract Scenes} dataset \citep{Zitnick2013} consists of 10k clip-art images and their descriptions. The images were created through AMT, where workers were asked to place a fixed vocabulary of 80 clip-art objects into a scene of their choosing. The descriptions were then sourced for these worker-created scenes. The authors provided these descriptions in two different forms. While the first group contains a single sentence description for each image, the second group includes two alternative descriptions per image. Each of these two descriptions consist of three simple sentences with each sentence describing a different aspect of the scene. The main advantage of this dataset is it affords the opportunity to explore image description generation without the need for automatic object recognition, thus avoiding the associated noise. A more recent version of this dataset has been created as a part of the visual question-answering (VQA) dataset \citep{Antol2015}. It contains 50k different scene images with more realistic human models and with five single-sentence descriptions. 
+
+The \textbf{Flickr30K} dataset \citep{Young2014} is an extended version of the Flickr8K dataset comprising around 31k images. The images in this dataset are mainly about humans involved in everyday activities and events. Each image is described by 5 sentences, like its minor version. Moreover, unlike the 8k version, this dataset is complemented with a \textit{denotation graph} that pairs generalized versions of the image captions with their visual denotations, i.e. the sets of images they describe.
+
+The \textbf{MS-COCO} (Common Objects in Context) dataset \citep{Lin2014}, by Microsoft, is one the largest datasets available for research in image description tasks. It includes 328k images of complex everyday scenes containing common objects in their natural context.  These images have been annotated with 5 descriptions per image, plus bounding boxes for objects belonging to 80 object categories. This dataset has been widely used for image description, something that is facilitated by the standard evaluation server that is available online since the 2015 COCO Captions Competition \footnote{Source: https://competitions.codalab.org/competitions/3221}. 
+
+Very recently, Google launched \textbf{Conceptual Captions} \citep{Sharma2018}, a huge dataset with an order of magnitude more images than the largest dataset to date (MS-COCO), and represents a wider variety of both images and image caption styles. However, unlike former datasets, which were annotated manually by humans, the 3.3M images of this dataset were collected programmatically, by extracting and filtering images and text annotations from billions of webpages. It consists of a wide variety of images and associated descriptions taken from original Alt-text attributes, automatically transformed to achieve a balance between cleanliness, informativeness, and learnability. The remaining image, caption pairs contain around 16,000 entity types, guaranteed to be well represented in terms of number of examples.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.45]{images/ch2/image-caption-examples.jpg}
+	\caption{Examples of images and their descriptions across various benchmark datasets}
+	\label{fig:samples}
+\end{figure}
+
+\subsubsection{Other datasets}
+
+This subsection summarizes other datasets that, in spite of being less popular that the ones already presented,  are to a certain extent relevant to the problem at hand.
+
+\begin{itemize}
+\item The Attribute Discovery dataset \citep{Berg2010} was collected using automatic dataset construction techniques that exploit the connection between text and images. This dataset consists of 4 broad shopping categories (bags, earrings, ties, and shoes). The data set was collected from \textit{like.com} and includes both images and associated textual descriptions.
+\item The \textbf{MIT-Adobe FiveK} \citep{Bychkovsky2011} dataset consists of 5K images containing a diverse set of scenes, subjects, and lighting conditions. These images are mainly about people, nature, and man-made objects.
+\item The \textbf{NYU-v2} dataset \citep{Silberman2012} is a more specialized dataset containing 1.5K RGBD images capturing 464 diverse indoor scenes, with detailed annotations. The particularity of this dataset is its focus on 3D segmentation. It has been augmented with five descriptions per image by \citet{Lin2015} for image description tasks.
+\item The \textbf{SUN Attribute} database \citet{Patterson2014} provides around 15K  images from 707 scene categories. It was derived from the SUN categorical database using crowdsourcing to annotate images with attributes. Previously, crowdsourced human studies were preformed to find a taxonomy of 102 discriminative attributes related to varied aspects, such as materials, surface properties, lighting, affordances, and spatial layout.
+\item The \textbf{FlickrStyle10k} dataset has 10K Flickr images with stylized captions. The training data consists of 7K images. The validation and test data consists of 2,000 and 1,000 images respectively. Each image contains romantic, humorous, and factual captions.
+\item  The \textbf{Stock3M} dataset \citep{Wang2017} has more than 3M images uploaded by the users of a stock image website. Each image is associated with one caption that is provided by the photo uploader. The captions are much shorter than those found on the MSCOCO dataset, but are claimed to be more natural, with a larger vocabulary and image content variety.
+\item The \textbf{VQA} (Visual Question Answering) dataset is intended to support a variation of the image description problem called \textit{visual question answering}: given an image and a natural language question about the image, the task is to provide an accurate natural language answer \citep{Antol2015}. To that aim, the dataset contains 50K abstract scenes using clip-art style graphics. It includes 20 paperdoll human models spanning genders, races, and ages with 8 different expressions, over 100 objects and 31 animals in various poses. The images are completed with five captions per image, as well as diverse questions and answers.
+\end{itemize}
+
+\subsection{Evaluation metrics}
+
+Evaluating Natural Language Generation (NLG) systems is a fundamentally difficult task \citep{Reiter2009}, so that it has become a research problem itself. However, we will simply summarize the metrics commonly used for evaluating the quality of image descriptions generated automatically.
+
+\subsubsection{Human judgement}
+
+A common way to assess the quality of automatically generated texts is the subjective evaluation by human judges. Automatically produced text is usually judged in terms of syntactical correctness (grammar compliance) and semantic correctness (relevance of the content). Another dimension of interest is the fluency of the text, especially when a surface realization technique is involved in the generation process. Image descriptions generated automatically can be evaluated using the same techniques that are common in other NLG tasks, an very particularly in machine translation (MT) tasks. In this case, judges get both the image and the generated description for the evaluation task. Subjective human evaluations of machine generated image descriptions are often performed on the Amazon Mechanical Turk by means of Likert-scale questions. Some examples of these kind of questions are:
+
+\begin{itemize}
+\item The description accurately describes the image
+\item The description is grammatically correct
+\item The description has no incorrect information
+\item The description is relevant for this image
+\item The description is human like
+\end{itemize}
+
+\subsubsection{Automatic evaluation metrics}
+
+Since human evaluation requires large amounts of non-reusable human effort, it is difficult to scale up. Furthermore, human judgement is inherently subjective, which makes it suffer from user variances. To avoid these pitfalls, automated metrics have been created with different properties. Below follows a short review of the most common metrics used for evaluating machine-generated image descriptions.
+
+IBM's \textbf{BLEU} (Bilingual Evaluation Understudy) \citep{Papineni2002} is a familiy of metrics conceived to substitute human judges in the evaluation of MT tasks, so besides being quick, inexpensive and language independent, it was designed to show good correlation with human judgement. This family of metrics use a weighted average of variable length phrase matches against the reference translations written by humans to measure their closeness. BLEU starts with a baseline metric from which a number of metrics are derived for different n-gram sizes: BLEU-1 compares the candidate sentence with sentences in unigram, BLEU-2 compares the candidate sentence with sentences in bigram, and so on, until BELU-4, which obtains the best correlation with human judgements While unigram scores account for the adequacy, higher n-gram scroes account for fluency. BLEU is popular because was it was the first metric popularized for MT tasks, long before the research on automatic image generation field took off. Although BLEU shows a reasonable correlation with human judgements it seems to work well only when the generated text is sort  \citep{Callison-Burch2006}, and it may even occur that an increase in BLEU score did not corresponds to an increase of quality \citep{Lin2004b}.
+
+Classical information retrieval metrics, like the median rank (mRank) and the precision and recall at k (S@k, R@K) have also been used sometimes to evaluate the descriptions returned by image captioning methods, particularly those that adopt an information retrieval approach. 
+
+\textbf{ROUGE} (Recall-Oriented Understudy for Gisting Evaluation) \citep{Lin2004a} is a set of metrics introduced as an alternative to BLEU to work with larger texts, like text summaries. This metric employs the longest common subsequence between a candidate sentence and a set of reference sentences to measure their similarity at sentence-level. The longest common subsequence between two sentences only requires in-sequence word matches, and the matched words are not necessarily consecutive. Determination of the longest common subsequence is achieved by using dynamic programming. Different versions of ROUGE exist for different tasks: ROUGE-1 and ROUGE-W are appropriate for single document evaluation whereas ROUGE-2 and ROUGE-SU4 have good performance for short summaries. 
+
+\textbf{METEOR} (Metric for Evaluation of Translation with Explicit ORdering) \citep{Banerjee2005} is another metric originally conceived to evaluate MT tasks. It is based on a generalized concept of unigram matching between the machine- produced translation and human-produced reference translations. Unigrams can be matched based on their surface forms, stemmed forms, and meanings. It first performs generalized unigram matches between a candidate sentence and a human-written reference sentence, and then computes a score based on the matching results. The score computation involves precision, recall and alignments of the matched elements, and in the case of multiple reference sentences, the best score among all the possible matches is taken as the final evaluation score. METEOR achieves better correlation at the sentence or the segment levels.
+
+\textbf{CIDEr} (Consensus-based Image Description Evaluation) \citep{Vedantam2015} adopts a novel paradigm which is based on human consensus, and was designed specifically to evaluate image description tasks instead of MT tasks. This metric measures the similarity of an automatically generated sentence to the majority --consensus-- of ground-truth sentences (image descriptions) written by humans. It works by encoding the frequency of the n-grams in the candidate sentence that appear in the reference sentences using a Term Frequency Inverse Document Frequency (TF-IDF) weighting for each n-gram. While most existing datasets have only five captions per image, which the authors consider is not enough to use human consensus, therefore they also created two new datasets with 50 human-generated sentences per image: \textbf{Pascal-50S} and \textbf{Abstract-50S}, which uses the 1000 images from the Pascal1K, and 500 random images from the Abstract Scene dataset, respectively. A version of CIDEr named \textbf{CIDEr-D} is available as a part of the MSCOCO evaluation server to enable systematic evaluation and benchmarking.
+
+\textbf{SPICE} (Semantic Propositional Image Caption Evaluation) \citep{Anderson2016} is a new evaluation metric for image descriptions based on a graph-based semantic representation of images called scene-graph \citep{Johnson2015, Schuster2015}. This graph can extract the information of different objects, attributes and their relationships from the image descriptions, and is based on the assumption than semantic propositional content is an important component of human caption evaluation. Extensive evaluations across a range of models and datasets indicate that SPICE captures human judgments over model-generated captions better than other automatic metrics. Furthermore, SPICE can answer questions such as which caption-generator best understands colors? and can caption-generators count?
+
+\textbf{SPIDEr} \cite{Liu2017b} has been proposed recently to overcome some of the problems attributed to existing metrics by combining the properties of two of them: CIDEr and SPICE. This combination is achieved by means of a policy gradient (PG) method that directly optimizes a linear combination of SPICE and CIDEr (hence the name SPIDEr). SPICE score ensures semantic faithfulness of generated sentences, while CIDEr score guarantees that these descriptions are syntactically fluent.
+
+\citep{Sharif2018} explore a learning-based approach to combine various metrics and report on their results. The idea behind this metric is the same behind SPIDEr: while some metrics tend to focus on the lexical and syntactical correctness (BLEU, ROUGE, CIDEr), other metrics tend to focus on the semantic relevance (SPICE). Therefore, combining the linguistic properties of various metrics should help achieve a better assessment of the quality of image description. Experimental results show improvements over other metrics in terms of correlation and accuracy on the Pascal-50S dataset.
+
+
+\subsection{Summary and benchmark results}
+
+This subsection summarises all the covered in this survey in various tables. 
+
+First two tables enumerate the datasets and evaluation metrics reported in each of the publications. Due to the large number of publications, we have divided them into two groups, according to whether the methods proposed use neural networks and deep learning or not.
+
+Third and fourth table presents the most relevant results achieved by the different methods researched for the most common datasets and metrics, that is: Flickr8k/30K and COCO datasets, and the BLUE, ROUGE, METEOR and CIDEr metrics.
+
+\begin{table}[hpt]
+    \caption{Summary of non neural methods, datasets and evaluation metrics}
+    \label{tab:methods-datasets-metrics}
+    \begin{longtable}{ p{50mm} | p{50mm} | p{60mm} }
+        Method reference &  Datasets & Evaluation Metrics \\
+        \citet{Farhadi2010} & Pascal1K & BLEU \\
+        \citet{Kulkarni2011} & Pascal1K & Human, BLEU \\
+        \citet{Li2011} & Pascal1K & Human, BLEU \\
+        \citet{Ordonez2011} & SBU &  \\
+        \citet{Yang2011} & Pascal1K & BLEU, ROUGE, METEOR \\
+        \citet{Gupta2012} & Pascal1K & Human, BLEU, ROUGE \\
+        \citet{Kuznetsova2012} & SBU & Human, BLEU \\
+        \citet{Mitchell2012} & Pascal1K & Human \\
+        \citet{Elliott2013} & VLT2K & Human, BLEU \\
+        \citet{Hodosh2013b} & Pascal1K, Flickr8K & Human, BLEU, ROUGE, mRank, R@k \\
+        \citet{Gong2014} & SBU1M, Flickr30K & R@k \\
+        \citet{Kuznetsova2014} & SBU & Human, BLEU, METEOR \\
+        \citet{Patterson2014} & SBU & BLEU \\
+        \citet{Socher2014} & Pascal1K & mRank, R@k \\
+        \citet{Verma2014} & IAPR, SBU, Pascal1K & BLEU, ROUGE, R@k \\
+        \citet{Yatskar2014} & Own data & Human, BLEU \\
+        \citet{Elliott2015} & VLT2K, Pascal1K & BLEU, METEOR \\
+        \citet{Lebret2015a} & Flickr30K, COCO & BLEU, R@k \\
+        \citet{Lebret2015b} & COCO & BLEU \\
+        \citet{MateosOrtiz2015} & Abstract Scenes & Human, BLEU \\
+        \citet{Ushiku2015} & Pascal1K, IAPR, SBU, COCO & BLEU \\
+        \hline
+    \end{longtable}
+\end{table}
+
+Note: \citep{Lebret2015a, Lebret2015b} do not use neural nets as part of their learning method, although they use a pretrained CNN for the representation of images, so they are in the frontier of both worlds. For this reason we have included them in both summary tables, the first one, devoted to non-neural methods, as well as the second one, dedicated to neural-based methods. 
+
+\begin{table}[hpt]
+    \caption{Summary of neural methods, datasets and evaluation metrics}
+    \label{tab:nn-methods-datasets-metrics}
+    \begin{longtable}{p{50mm} | p{50mm} | p{60mm} }
+        Method reference &  Datasets & Evaluation Metrics \\
+        \citet{Karpathy2014} & Flickr8K/30K, COCO & BLEU, METEOR, CIDEr \\
+        \citet{Kiros2014a} & IAPTR, Attribute Descriptions & BLEU, PPLX \\
+        \citet{Kiros2014b} & Flickr8K/30K & R@k, mRank \\
+        \citet{Mao2014} & IAPTR, Flickr8K/30K & BLEU, mRank, R@k \\
+        \citet{Chen2015} & Pascal1K, Flickr8K/30K, COCO & BLEU, METEOR, CIDEr, mRank, R@k \\
+        \citet{Donahue2015} & Flickr30K, COCO & Human, BLEU, mRank, R@k \\
+        \citet{Devlin2015} & COCO & BLEU, METEOR \\
+        \citet{Fang2015} & Pascal1K, COCO & Human, BLEU, METEOR, PPLX \\
+        \citet{Jia2015} & Flickr8K/30K, COCO & BLEU, METEOR, CIDEr \\
+        \citet{Jin2015} & Flickr8K/30K, COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Karpathy2015} & Flickr8K/30K, COCO & BLEU, METEOR, CIDEr, mRank, R@k \\
+        \citet{Lebret2015a} & Flickr30K, COCO & BLEU, R@k \\
+        \citet{Lebret2015b} & COCO & BLEU \\
+        \citet{Ma2015} & Flickr8K/30K & mRank, R@k \\
+        \citet{Mao2015a} & IAPR, Flickr30K, COCO & BLEU, mRank, R@k \\
+        \citet{Vinyals2015} & Pascal1K, SBU, Flickr30K, COCO & Human, BLEU, METEOR, CIDEr, mRank, R@k \\
+        \citet{Xu2015} & Flickr8K/30K, COCO & BLEU, METEOR \\
+        \citet{Yagcioglu2015} & Flickr8K/30K, COCO & Human, BLEU, METEOR, CIDEr \\
+        \citet{Hendricks2016} & COCO, ImageNet & BLEU, METEOR \\
+        \citet{Johnson2016} & Visual Genome & METEOR, AP, IoU \\
+        \citet{Ma2016} & Flickr8K, UIUC & BLEU, R@k \\
+        \citet{Mao2016} & ReferIt & BLEU, METEOR, CIDEr \\
+        \citet{Mathews2016} & COCO, SentiCap & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Sugano2016} & COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Tran2016} & COCO, MIT-Adobe, Instagram &  Human\\
+        \citet{Wang2016} & Flickr8K & BLEU, METEOR, PPLX \\
+        \citet{Yang2016} & COCO & BLEU, METEOR, CIDEr \\
+        \citet{You2016} & Flickr30K, COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Chen2017} & Flickr8K/30K, COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Dai2017} & Flickr30K, COCO & BLEU, METEOR \\
+        \citet{Gan2017a} & FlickrStyle10K & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Gan2017b} & Flickr30K, COCO &  BLEU, METEOR, CIDEr \\
+        \citet{Gu2017} & Flickr30K, COCO & BLEU, METEOR, CIDEr, SPICE \\
+        \citet{Liu2017a} & Flickr30K, COCO & BLEU, METEOR \\
+        \citet{Liu2017b} & COCO & Human, SPIDEr \\
+        \citet{Lu2017} & Flickr30K, COCO & BLEU, METEOR, CIDEr \\
+        \citet{Park2017} & Instagram & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Pedersoli2017} & COCO & BLEU, METEOR, CIDEr \\
+        \citet{Ren2017} & COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Rennie2017} & COCO & BLEU, METEOR, CIDEr, SPICE \\
+        \citet{Shetty2017} & COCO & BLEU, METEOR, SPICE \\
+        \citet{Tavakoliy2017} & COCO, Pascal 50S & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Venugopalan2017} & COCO, ImageNet & METEOR \\
+        \citet{Wang2017} & COCO, Stock3M & METEOR, ROUGE, CIDEr, SPICE \\
+        \citet{Yang2017} & VisualGenome & METEOR, AP, IoU \\
+        \citet{Yao2017a} & COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Yao2017b} & COCO, ImageNet & METEOR \\
+        \citet{Zhang2017} & COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Aneja2018} & COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Wang2018} & COCO & BLEU, METEOR, ROUGE, CIDEr \\
+        \citet{Wu2018} & Flickr8K/30K, COCO & BLEU, METEOR, CIDEr \\
+        \hline
+    \end{longtable}
+\end{table}

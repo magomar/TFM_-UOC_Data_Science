@@ -1,5 +1,5 @@
 \chapter{Introduction}
-\label{chapter:introduccion}
+\label{ch:introduccion}
 
 \section{Motivation}
 
@@ -7,7 +7,7 @@ The web provides a vast amount of information, including a lot of text, but it i
 
 Automatic image description --also known as automatic image captioning-- can be defined as the task of automatically generating a description of an image using natural language. It is a very challenging problem that encompasses two kind of problems: the problem of understanding an image, which is a \textbf{Computer Vision (CV)} task, and the problem of generating a meaningful and grammatically-correct description of the image, which is a kind of \textbf{Natural-Language Processing (NLP)} task . Therefore, to tackle this task it is necessary to advance the research in the two fields, CV and NLP, as well as promoting the cooperation of both communities to address the specific problems arising when combining both tasks.
 
-Figure \ref{fig:image-captioning} shows an example of the automatic image generation tasks addressed by this project.
+\Cref{fig:image-captioning} shows an example of the automatic image generation tasks addressed by this project.
 
 \begin{figure}[hpt]
 	\centering
@@ -32,7 +32,7 @@ This project aims at advancing in the task of automatically generating image des
 \item Get a solid understanding of the problem at hand and review the state-of-art solutions to it
 \item Get practical knowledge on the technologies required to solve this problem
 \item Develop a model using a benchmark dataset like the Flickr30K
-\item Scale the model to a larger benchmark dataset such as the COCO\cite{Lin2014} dataset or the more recent Conceptual Captions Dataset by Google \cite{Sharma2018}  (see Figure \ref{fig:conceptual-captions}).
+\item Scale the model to a larger benchmark dataset such as the COCO\cite{Lin2014} dataset or the more recent Conceptual Captions Dataset by Google \cite{Sharma2018}  (see \cref{fig:conceptual-captions}).
 \item Evaluate the model, ideally partaking in some challenge or competition, like the ones using the COCO dataset or the Conceptual Captions dataset.
 \end{enumerate}
 
@@ -51,7 +51,7 @@ As a methodology, it includes descriptions of the typical phases of a project, t
 
 As a process model, CRISP-DM provides an overview of the data mining life cycle.
 
-Figure \ref{fig:crisp-dm} depicts the relationships between the different phases of the CRISP-DM model. The sequence of the phases is not strict and moving back and forth between different phases is often required. The arrows in the process diagram indicate the most important and frequent dependencies between phases. The outer circle in the diagram symbolizes the cyclic nature of data mining itself. A data mining process continues after a solution has been deployed. The lessons learned during the process can trigger new, often more focused business questions, and subsequent data mining processes will benefit from the experiences of previous ones.
+\Cref{fig:crisp-dm} depicts the relationships between the different phases of the CRISP-DM model. The sequence of the phases is not strict and moving back and forth between different phases is often required. The arrows in the process diagram indicate the most important and frequent dependencies between phases. The outer circle in the diagram symbolizes the cyclic nature of data mining itself. A data mining process continues after a solution has been deployed. The lessons learned during the process can trigger new, often more focused business questions, and subsequent data mining processes will benefit from the experiences of previous ones.
 
 \begin{figure}[hpt]
 	\centering
@@ -74,27 +74,33 @@ The process model consists of six major phases:
 
 \section{Planning}
 
-Main tasks and milestones
+This section briefly describes the planning for this Final Master's work.
 
-\begin{table}[hbt]
-\begin{tabular}{|l|l|l|}
-\hline
-Phase   & End  & Description   \\ \hline
-1 & 3/3/2019 & Definition and planning  \\ \hline
-2 & 24/3/2019 & State of the Art \\ \hline
-3 & 19/5/2019 & Development \\ \hline
-4 & 9/6/2019 & Complete this report \\ \hline
-5 & 16/6/2019 & Presentation
+\begin{table}[ht]
+\centering
+\caption{Main tasks and milestones.}
+\label{tab:retrieval-classification}
+\begin{tabular}[t]{lll}
+    \toprule
+    Phase & End  & Description\\
+    \midrule
+    1 & 3/3/2019 & Definition and planning\\
+    2 & 24/3/2019 & State of the Art\\
+    3 & 19/5/2019 & Development\\
+    4 & 9/6/2019 & Complete this report\\
+    5 & 16/6/2019 & Presentation\\
+    \bottomrule
 \end{tabular}
 \end{table}
 
-Phase 2: this phase will encompass the following tasks:
+
+Phase 2 will encompass the following tasks:
 \begin{itemize}
 \item Reviewing relevant bibliography
 \item Studying the problem domain (business understanding), and becoming familiar with the data. At this stage we would also start preparing the data for the modeling stage
 \end{itemize}
 
-Phase 3: this will be the longest phase, and it will include the following tasks  
+Phase 3 will be the longest phase, and it will include the following tasks:
 \begin{itemize}
 \item Preparing the data. Although data preparation could be started during phase 2, depending on the chosen models it could be necessary to conduct some additional data preparation operations
 \item Generating one or various models. We plan at creating at least two models, one that would replicate existing work, and another one to explore new ideas and try to beat the baseline model.
@@ -102,7 +108,7 @@ Phase 3: this will be the longest phase, and it will include the following tasks
 \item Publication: We consider two courses of action: a) participating in the Conceptual Captions Challenge by Google, and b) delivering some product to the final user, although it would be a very basic prototype given the little time available.
 \end{itemize}
 
-In phase 4 we will complete this report. We would probably overlap this task with some of the tasks in phase 3 that will required more time, like the evaluation of the models and the participation in challenges.
+In phase 4 we will complete this report. This phase would probably overlap with some of the tasks in phase 3 that will require additional time, like the evaluation of the models and the participation in challenges.
 
-In phase 5 we will present the results achieved for its evaluation. These results will include the code, the documentation and a public defense of the project in front of an academic board
+In phase 5 we will present the results achieved for its evaluation. These results will benchmark results, documentations, and the code itself. Finally, there will be a public defense of the project in front of an academic board, which should be conveniently prepared.
 

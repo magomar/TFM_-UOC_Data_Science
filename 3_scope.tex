@@ -1,2 +1,48 @@
 \chapter{Scope of the project}
 \label{ch:scope}
+
+Language models based on recurrent neural networks have dominated recent image caption generation tasks.
+For a few years this was the way to solve sequence learning and sequence translation (seq2seq), which also resulted in amazing results in speech to text comprehension and the raise of modern voice assistants. RNN also had a great impact on machine translation, which resulted in the ability to translate documents into different languages, but also translate images into text, text into images, and captioning video.
+
+However, ResNet and Attention shoed that . One could then better understand that LSTM were a clever bypass technique. Also attention showed that MLP network could be replaced by averaging networks influenced by a context vector. More on this later.
+
+It only took 2 more years, but today we can definitely say:
+
+“Drop your RNN and LSTM, they are no good!”
+
+But do not take our words for it, also see evidence that Attention based networks are used more and more by Google, Facebook, Salesforce, to name a few. All these companies have replaced RNN and variants for attention based models, and it is just the beginning. RNN have the days counted in all applications, because they require more resources to train and run than attention-based models. See this post for more info.
+
+But why?
+Remember RNN and LSTM and derivatives use mainly sequential processing over time. See the horizontal arrow in the diagram below:
+
+See article: The fall of RNN/LSTM
+<https://towardsdatascience.com/the-fall-of-rnn-lstm-2d1594c74ce0>
+
+
+Some notes:
+
+https://news.ycombinator.com/item?id=10611639
+
+fchollet on Nov 22, 2015 | parent | favorite | on: NeuralTalk2: Efficient Image Captioning code in To...
+
+Here's the MS COCO leaderboard: http://mscoco.org/dataset/#captions-leaderboard
+Google's Show and Tell seems considerably superior to competing approaches.
+
+karpathy on Nov 22, 2015 [-]
+
+So here's what's funny about the leaderboard. The NeuralTalk submission (near bottom of the list) is in fact a re-implementation of the Show and Tell model (my paper and Oriol's are basically identical models - we plug in the top of the CNN to an RNN on first time step. Except I use vanilla RNN and he used an LSTM (which turns out to work a bit better)). But it's an identical model - in that submission I had in fact used the LSTM implementation in NeuralTalk.
+What's different between the two is the engineering portion: NeuralTalk was written in Python and ran on CPU without batches (so probably it did not converge as well), it did not do CNN finetuning (which helps a ton), and it did not do ensembles, and I used VGG while Oriol used GoogLeNet (though I don't expect much difference there). There are a few more tricks that Oriol talks about that give you a few small extra points, but that's basically it. I also don't want to take away from Oriol's top result (these small tricks and engineering are very valuable and hard to come up with), but I would be hesitant to draw conclusions about which models work best by looking at the model diagrams in a Figure, and comparing to numbers in the table.
+
+That's why I've over time grown cynical about results in tables of papers that compare one work to another - there are too many variables to keep track of and it's confusing unless you know the full details. The truth is that results in tables are model + engineering + noise. The papers pretend that it's all model, but in fact the latter 2 have a huge impact. At least results that only compare two models in the same framework can be trusted a bit more to contain information, but even then you find that in practice people can be a lot more generous to their own models than their baselines. Hence the famous saying: "The second best model in the paper is in fact what you want to use".
+
+To answer the original question though: The idea presented in Show Attend and Tell (spatial attention during caption generation) is clearly good and if compared properly I'm confident would turn out to work better. Also, the Berkeley paper seemed to have a nice architecture where there was a 2-layer LSTM but the image was only plugged in on the second layer (1st layer was an image-independent Language Model). In their controlled experiments this seemed to work well, I think it's an interesting idea, and I'd want to try to reproduce it. The models presented in my work and Oriol's are the simplest architecture that has the core nugget of the approach and that gets the job done, but I'd expect many bells and whistles on top of this to work better.
+
+
+	
+fchollet on Nov 22, 2015 [-]
+
+Agreed, isolating the contribution of the "model" itself can be borderline impossible, and the details of model engineering have a considerable impact on performance.
+That's why I like Kaggle competitions: most approaches tried on a given challenge will likely be optimized to their very limits, so that it's the nature of the different approaches that ends up making the difference.
+
+
+

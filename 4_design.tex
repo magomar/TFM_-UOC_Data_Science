@@ -1,0 +1,114 @@
+\chapter{System design}
+\label{ch:design}
+
+In this chapter, both the architecture and the operation of this system are described. We begin by delimiting the scope of the system develop for this project. Next, we present the overall architecture of the system, followed by specific sections devoted to the different parts of the system: encoder, decoder. Finally, we describe the methods used to train and evaluate the system.
+
+\section{Scope}\label{sec:scope}
+
+Before diving into the design of the system developed for this project, it seems convenient to delimit the scope of it as well as justify the design decisions taken. In particular, we have to decide on three main separated aspects:
+
+\begin{enumerate}
+\item To begin with, we should decide on the kind of architecture to design our system, which can further be divided into various finer details, like deciding the concrete models to use for each component of the architecture, whether to use transfer learning, and whether to use ensemble methods, among others.
+\item Another decision of high importance if the dataset to use in order to train and evaluate our system. As a secondary decision, we should also decide which metrics to use for evaluating it.
+\item Finally, we should decide on the specific experiments, which in turn will involve deciding on various hyper-parameters and configuration options that may be available in our model.
+\end{enumerate}
+
+Deciding on those three aspects should be conditioned by a combination of factors, from research considerations to hardware requirements and time constraints. This chapter will briefly discuss on these aspects, and then we will conclude with the final decisions that define the scope of the system to be developed as part of this project.
+
+\subsection{Research considerations}
+
+As we have seen in our review of the state of the art (\cref{ch:state_of_the_art}), image captioning is a thrilling field of research that have seen tremendous advances in recent years, specially since neural networks and deep learning were applied to it. From the first neural model proposed by \citet{Kiros2014_LBL}, a myriad of different neural models have been proposed, usually combining a visual encoder and a text decoder. Although there are some exceptions, the majority of the models proposed so far use some form of Convolutional Neural Network (CNN) for the encoder, and some form of Recurrent Neural Network (RNN) for the decoder. Some models  also use CNN for the decoder, and a few recent models include Generative Adversarial Networks (GAN) to achieve more varied and expressive captions. Most of models proposed use some form of supervised learning, typically back-propagation, but there is a growing number of models that include reinforcement learning, and there have been some recent attempts to use also semi-supervised learning, and even unsupervised learning. 
+
+Summing up, there are many options to choose from in order to develop our own image captioning system. If we look at the results obtained from these models in benchmark datasets, we can see various patterns and trends.
+
+\begin{itemize}
+\item First, end-to-end approaches based on the encoder-decoder framework prevail over compositional architectures.
+\item Second, attention mechanisms have flourished and are a key component included in the vast majority of models, although they can adopt different forms.
+\item Third, the addition of reinforcement learning is gaining a lot of momentum as a means to improve the quality of generated captions when considering language quality metrics such as CIDEr.
+\item Fourth, models tend to increase in complexity by stacking more layers and including additional methods and forms of learning. Another aspect of this trend is the use of ensemble methods that combine various models together to produce the final result.
+\end{itemize}
+
+Besides the aforementioned trends and patterns, the study of the published research relative to image captioning reveals a 
+high degree of alignment between this research and the more general research sequence-to-sequence (\textit{seq2seq}) learning and sequence translation problems. Therefore, it would be interesting to study current trends in \textit{seq2seq} research to anticipate the next advances in image captioning.
+
+Indeed, neural image captioning systems adopted the encoder-decoder architecture used in sequence translation, with the particularity of using CNN for the encoder, but the decoder is a RNN as those used in seq2seq problems. Next, ResNet and Attention make its appearance, and rapidly gained popularity, both in seq2seq learning and image captioning.
+
+Attention-based networks are increasingly used by the big players in the IT world, including Google and Facebook. The main reason from this shift from simple RNN to attention-based architectures is because the former require more resources to train and run than the latter. Therefore, we deem attention as a key ingredient to include in our own system.
+
+\subsection{Hardware requirements and time constraints}
+
+Although for some projects hardware and time may appear as two separate aspects to factor in, they are closely related when we are dealing with deep learning. That is because due to the vast size of some datasets, training some systems may require either fabulous hardware resources or incredibly long periods, and even a combination of both.
+
+For this project we have to deal with a combination of both little time and limited hardware resources, so we have to limit the scope of our project to something manageable.
+
+At the beginning of this project, we had at our disposal a computer equipped with an NVIDIA GTX 1070 GPU supporting CUDA, which is a must-have for any deep learning project beyond toy examples.
+
+After doing some preliminary experiments we realized that with the hardware at hand, it was going to be unfeasible to work with current state of the art benchmark datasets such as MS COCO (not to mention the Conceptual Captions dataset, recently released by Google). Furthermore, we got serious problems when using the computer in interactive mode whilst training a deep learning model. 
+
+One option was to conduct our experiments on a smaller, dataset such as the Flickr8K or perhaps the Flickr30K dataset, but there are quite outdated nowadays. Therefore, in order to work with bigger datasets I decided to invest in a new, more powerful GPU, and so I bought an NVIDIA GTX 20180 Ti. I got this GPU installed in the same computer, alongside the GTX 1070. As a result of the new configuration, the training times reduced considerably, and it become feasible to use the computer whilst training a model on the COCO dataset.
+
+The most relevant specifications of the hardware used to conduct the experiments as as follows:
+
+\begin{itemize}
+\item CPU: Intel Core i7-4790K (4 cores, 8 threads, clocked @ 4 GHz)
+\item RAM: 16GB DIMM DDR3 2400 (clocked @ 1333 MHz)
+\item Storage: 2 x SSD Samsung 850 Evo 250GB
+\item GPU: NVIDIA GTX 1070
+\end{itemize}
+
+With that hardware, we deem it possible to train models one the full COCO dataset in less than a week, depending on the concrete architecture of the net and different hyper parameters on the net, as well as some restrictions imposed on the training data, such as the size of the vocabulary, or the maximum caption length allowed.
+
+\subsection{Software requirements}
+
+With respect to the software requirements, from the very beginning of the project, it was decided to met two kind of requirements:
+\begin{itemize}
+    \item Using a language we are familiar with
+    \item Using a popular framework with a big community 
+\end{itemize}
+
+The combination of the two requisites above led us to choose Python as the development language, and Keras with Tensorflow backend as the computational framework. 
+
+However, in the end we decided to take a little risk by using an alpha version of the Keras-Tensorflow stack that has been released recently, \textbf{Tensorflow 2.0.0-alpha}.
+
+\subsection{Summing up}
+
+The study of published research resulted in the selection of an \textbf{encoder-decoder architecture with an attention mechanism}, in the likes of the models reported by \citet{Xu2015}. 
+
+However, there are so many options to choose from for the different components of our system, that we should limit those options to a few options.
+\begin{itemize}
+    \item \textbf{Encoder}: we aim at trying at least two different encoders, like the \textbf{Inception-V3} network, and the \textbf{NASNet}.
+    \item \textbf{Decoder}: for this component, the idea is to try both \textbf{GRU} and \textbf{LSTM} units. 
+\end{itemize}
+
+Finally, if there is enough time we may try different hyper-parameters, such as the number of hidden units or units in the embedding layer. Other options to play with are the size of the vocabulary, but that is difficult to estimate at this stage of the project.
+
+
+\section{Overall architecture}
+
+As we have discussed in previous section \cref{ch:scope}, we have decided to develop an end-to-end deep learning solution to the image captioning problem based on an \textbf{encoder-decoder architecture} with an \textbf{attention mechanism}. This is so far the most common architecture used by state of the art systems, as we have seen in our review of the field (\cref{ch:state_of_the_art}.)
+More specifically, our system will consist of the following components:
+
+\begin{itemize}
+    \item Convolutional Neural Network (CNN) for the encoder
+    \item Recurrent Neural Network (RNN) for the decoder
+    \item Soft attention mechanism
+\end{itemize}
+
+
+\section{Encoder}
+
+\section{Decoder}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

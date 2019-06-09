@@ -1,0 +1,80 @@
+\subsection{Attention mechanism}
+
+A recent trend in Deep Learning is the use of attention mechanisms, typically added to the decoder in an encoder-decoder architecture. Attention is, to some extent, motivated by how we pay visual attention to different regions of an image or correlate words in one sentence. Human visual attention is well-studied and while there exist different models, all of them essentially come down to being able to focus on a certain region of an image with "high resolution" while perceiving the surrounding image in "low resolution", and then adjusting the focal point over time. Given a small patch of an image, pixels in the rest provide clues about what should be displayed there.
+For example, we expect to see a pointy ear in the yellow box because we have seen a dog’s nose, another pointy ear on the right, and Shiba’s mystery eyes (stuff in the red boxes). However, the sweater and blanket at the bottom would not be as helpful as those doggy features.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.3]{images/ch4/example-image-attention.png}
+	\caption{}
+	\label{fig:example-image-attention}
+\end{figure}
+
+Attention in Neural Networks has a long history, particularly in image recognition, but only recently have attention mechanisms made their way into recurrent neural networks architectures that are typically used in NLP (and increasingly also in vision).
+
+To understand what attention can do for us, let’s use Neural Machine Translation (NMT) as an example. Traditional Machine Translation systems typically rely on sophisticated feature engineering based on the statistical properties of text. In short, these systems are complex, and a lot of engineering effort goes into building them. Neural Machine Translation systems work a bit differently. In NMT, we map the meaning of a sentence into a fixed-length vector representation and then generate a translation based on that vector. By not relying on things like n-gram counts and instead trying to capture the higher-level meaning of a text, NMT systems generalize to new sentences better than many other approaches. Perhaps more importantly, NTM systems are much easier to build and train, and they don’t require any manual feature engineering. In fact, a simple implementation in Tensorflow is no more than a few hundred lines of code.
+
+Most NMT systems work by encoding the source sentence (e.g. a German sentence) into a vector using a Recurrent Neural Network, and then decoding an English sentence based on that vector, also using a RNN.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.3]{images/ch4/nmt-encoder-decoder.png}
+	\caption{}
+	\label{fig:nmt-encoder-decoder}
+\end{figure}
+
+In the picture above, “Echt”, “Dicke” and “Kiste” words are fed into an encoder, and after a special signal (not shown) the decoder starts producing a translated sentence. The decoder keeps generating words until a special end of sentence token is produced. Here, the h vectors represent the internal state of the encoder.
+
+If you look closely, you can see that the decoder is supposed to generate a translation solely based on the last hidden state (h_3 above) from the encoder. This h3 vector must encode everything we need to know about the source sentence. It must fully capture its meaning. In more technical terms, that vector is a sentence embedding. In fact, if you plot the embeddings of different sentences in a low dimensional space using PCA or t-SNE for dimensionality reduction, you can see that semantically similar phrases end up close to each other. That’s pretty amazing.
+
+Still, it seems somewhat unreasonable to assume that we can encode all information about a potentially very long sentence into a single vector and then have the decoder produce a good translation based on only that. Let’s say your source sentence is 50 words long. The first word of the English translation is probably highly correlated with the first word of the source sentence. But that means decoder has to consider information from 50 steps ago, and that information needs to be somehow encoded in the vector. Recurrent Neural Networks are known to have problems dealing with such long-range dependencies. In theory, architectures like LSTMs should be able to deal with this, but in practice long-range dependencies are still problematic. For example, researchers have found that reversing the source sequence (feeding it backwards into the encoder) produces significantly better results because it shortens the path from the decoder to the relevant parts of the encoder. Similarly, feeding an input sequence twice also seems to help a network to better memorize things.
+
+I consider the approach of reversing a sentence a “hack”. It makes things work better in practice, but it’s not a principled solution. Most translation benchmarks are done on languages like French and German, which are quite similar to English (even Chinese word order is quite similar to English). But there are languages (like Japanese) where the last word of a sentence could be highly predictive of the first word in an English translation. In that case, reversing the input would make things worse. So, what’s an alternative? Attention Mechanisms.
+
+With an attention mechanism we no longer try encode the full source sentence into a fixed-length vector. Rather, we allow the decoder to “attend” to different parts of the source sentence at each step of the output generation. Importantly, we let the model learn what to attend to based on the input sentence and what it has produced so far. So, in languages that are pretty well aligned (like English and German) the decoder would probably choose to attend to things sequentially. Attending to the first word when producing the first English word, and so on. That’s what was done in Neural Machine Translation by Jointly Learning to Align and Translate and look as follows:
+
+NMT Attention
+
+Here, The y‘s are our translated words produced by the decoder, and the x‘s are our source sentence words. The above illustration uses a bidirectional recurrent network, but that’s not important and you can just ignore the inverse direction. The important part is that each decoder output word y_t now depends on a weighted combination of all the input states, not just the last state. The a‘s are weights that define in how much of each input state should be considered for each output. So, if a_{3,2} is a large number, this would mean that the decoder pays a lot of attention to the second state in the source sentence while producing the third word of the target sentence. The a's are typically normalized to sum to 1 (so they are a distribution over the input states).
+
+A big advantage of attention is that it gives us the ability to interpret and visualize what the model is doing. For example, by visualizing the attention weight matrix a when a sentence is translated, we can understand how the model is translating:
+
+NMT Attention Matrix
+
+Here we see that while translating from French to English, the network attends sequentially to each input state, but sometimes it attends to two words at time while producing an output, as in translation “la Syrie” to “Syria” for example.
+
+\section{Attention in image captioning}
+
+%For this project, we have developed an end-to-end model using the CNN-RNN architecture with the addition of an attention mechanism. 
+
+In the original CNN-RNN model, all output predictions are based on the final and static output of the encoder. That is, the visual context used by the RNN to generate captions doesn't change during the generation process. First models proposed took this simple approach, like the \textit{LRCN} model by \citet{Donahue2015}, or the \textit{Show and Tell} model by \citet{Vinyals2015}, depicted in \cref{fig:cnn-lstm-without-attention.png} and .
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.45]{images/ch4/cnn-lstm-without-attention.png}
+	\caption{LSTM model combined with a CNN image embedder and word embeddings in the Show and Tell model \citep{Vinyals2015}}
+	\label{fig:rnn-enco-deco}
+\end{figure}
+
+That approach was fine for describing pictures of very simple scenes, like an object, an animal or a person standing still. However, describing more complex scenes like groups of different people or dynamic activities proved to be a much more difficult task. Describing complex images requires not only to classify objects, but to describe those objects (including people and things) and their relations. In order to deal with this complexity, researches started looking at methods to provide contextual information to their caption generation systems. First attempts focused on decomposing the images into regions and generating sentences for these specific regions rather than for the global image. This approach is called dense captioning, and produces results that may be more relevant and accurate, when contrasted with captioning an entire image with a single sentence.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.45]{images/ch4/dense-captioning.png}
+	\caption{Dense captioning: the model describes individual parts of the image, denoted by bounding boxes. Source \citep{Johnson2015}}
+	\label{fig:rnn-enco-deco}
+\end{figure}
+
+The problem with the former approach is the excess of information. How to combine all that information about different parts of the scene into a single, meaningful sentences that captures the most important elements of the image? The answer to that question is the introduction of attention mechanisms to decide on which part of the image to focus as the caption generation progresses.
+
+Attention as a technique, in this context, refers to the ability to weight regions of the image differently. Broadly, it can be understood as a tool to direct the allocation of available processing resources towards the most informative parts of the input signal. Rather than summing up the image as a whole, with attention the network can add more weight to the ‘salient’ parts of the image. Additionally, for each outputted word the network can recompute its attention to focus on a different part of the image.
+
+There are multiple ways to implement attention; \citet{Xu2015} divide the image into a grid of regions after the CNN feature extraction, and produce one feature vector for each. These features are used in different ways for soft and hard attention:
+
+In the soft attention variant, each region’s feature vector receives a weight (can be interpreted as the probability of focusing at that particular location) at every time step of the decoding RNN which signifies the relative importance of that region in order to generate the next word. The MLP (followed by a softmax), which is used to calculate these weights, is a deterministic part of the computational graph and therefore can be trained end-to-end as a part of the whole system using backpropagation as usual.
+With hard attention only a single region is sampled from the feature vectors at every time step to generate the output word (using probabilities calculated similarly as mentioned before). This prevents the network training by backpropagation due to the stochasticity of sampling.
+
+
+
+
+

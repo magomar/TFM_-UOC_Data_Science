@@ -1,6 +1,6 @@
 \documentclass[12pt,a4paper,twoside]{book}
 \usepackage{graphicx}
-\usepackage{setspace}	%double spacing for text, single for captions, footnotes, etc.
+\usepackage{setspace}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{natbib}
@@ -19,6 +19,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage[width=.9\textwidth]{caption}
+\usepackage{svg}
+\usepackage[T1]{fontenc}
 \graphicspath{ {images/} }
 
 % general settings
@@ -55,7 +57,7 @@
 \renewcommand{\algorithmicensure}{\textbf{Output: }}
 
 % settings for array stretching in tables
-\renewcommand\arraystretch{1.25}
+% \renewcommand\arraystretch{1.25}
 
 
 %%%%%%%%%%%%
@@ -109,11 +111,12 @@
 % capitulos del documento
 \input{1_introduction.tex}
 \input{2_state_of_the_art.tex}
-%\input{3_scope.tex}
-%\input{4_datasets.tex}
-%\input{5_models.tex}
-%\input{6_evaluation.tex}
-%\input{7_conclusions.tex}
+\input{3_theory_cnn.tex}
+\input{3_theory_rnn.tex}
+\input{3_theory_enco-deco.tex}
+\input{4_design.tex}
+\input{5_experiments.tex}
+\input{6_conclusions.tex}
 
 % bibliografia
 \addcontentsline{toc}{chapter}{Bibliography}

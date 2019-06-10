@@ -88,17 +88,20 @@ $$\hat{p}(\mathrm{is}|\mathrm{Statistics}) = \frac{n(\mathrm{Statistics~is})}{n(
 
 Here $n(w)$ and $n(w, w')$ are the number of occurrences of singletons and pairs of words respectively. Unfortunately, estimating the probability of a word pair is somewhat more difficult, since the occurrences of ‘Statistics is’ are a lot less frequent. In particular, for some unusual word combinations it may be tricky to find enough occurrences to get accurate estimates. Things take a turn for the worse for 3 word combinations and beyond. There will be many plausible 3-word combinations that we likely will not see in our dataset. Unless we provide some solution to give such word combinations nonzero weight we will not be able to use these as a language model. If the dataset is small or if the words are very rare, we might not find even a single one of them.
 
-A common strategy is to perform some form of Laplace smoothing, that is, adding a small constant to all counts. This helps with singletons, e.g. via
+A common strategy is to perform some form of Laplace smoothing, that is, adding a small constant to all counts. 
+%This helps with singletons, e.g. via
 
-$$
-\begin{aligned}
-    \hat{p}(w) & = \frac{n(w) + \epsilon_1/m}{n + \epsilon_1} \\
-    \hat{p}(w'|w) & = \frac{n(w,w') + \epsilon_2 \hat{p}(w')}{n(w) + \epsilon_2} \\
-    \hat{p}(w''|w',w) & = \frac{n(w,w',w'') + \epsilon_3 \hat{p}(w',w'')}{n(w,w') + \epsilon_3}
-\end{aligned}
-$$
+% $$
+% \begin{aligned}
+%     \hat{p}(w) & = \frac{n(w) + \epsilon_1/m}{n + \epsilon_1} \\
+%     \hat{p}(w'|w) & = \frac{n(w,w') + \epsilon_2 \hat{p}(w')}{n(w) + \epsilon_2} \\
+%     \hat{p}(w''|w',w) & = \frac{n(w,w',w'') + \epsilon_3 \hat{p}(w',w'')}{n(w,w') + \epsilon_3}
+% \end{aligned}
+% $$
 
-Here the coefficients $\epsilon_i > 0$ determine how much we use the estimate for a shorter sequence as a fill-in for longer ones. Moreover, $m$ is the total number of words we encounter. The above is a rather primitive variant of what Kneser-Ney smoothing and Bayesian Non-parametrics can accomplish. See e.g. \textit{The Sequence Memoizer} by \citep{Wood2011} for more details of how to accomplish this. Unfortunately models like this get unwieldy rather quickly: first off, we need to store all counts and secondly, this entirely ignores the meaning of the words. For instance, ‘cat’ and ‘feline’ should occur in related contexts. Deep learning based language models are well suited to take this into account. This, it is quite difficult to adjust such models to additional context. Lastly, long word sequences are almost certain to be novel, hence a model that simply counts the frequency of previously seen word sequences is bound to perform poorly there.
+% Here the coefficients $\epsilon_i > 0$ determine how much we use the estimate for a shorter sequence as a fill-in for longer ones. Moreover, $m$ is the total number of words we encounter. The above is a rather primitive variant of what Kneser-Ney smoothing and Bayesian Non-parametrics can accomplish. 
+
+See e.g. \textit{The Sequence Memoizer} by \citep{Wood2011} for more details of how to accomplish this. Unfortunately models like this get unwieldy rather quickly. First off, we need to store all counts and secondly, this entirely ignores the meaning of the words; for instance, ‘cat’ and ‘feline’ should occur in related contexts. Besides, it is quite difficult to adjust such models to additional context. Lastly, long word sequences are almost certain to be novel, hence a model that simply counts the frequency of previously seen word sequences is bound to perform poorly there.
 
 \subsubsection{Markov Models and n-grams}
 
@@ -112,7 +115,8 @@ p(w_1, w_2, w_3, w_4) &=  p(w_1) p(w_2 | w_1) p(w_3 | w_1, w_2) p(w_4 | w_2, w_3
 \end{aligned}
 $$
 
-Since they involve one, two or three terms, these are typically referred to as \textit{unigram}, \textit{bigram} and \textit{trigram} models. In the following we will learn how to design better models.
+Since they involve one, two or three terms, these are typically referred to as \textit{unigram}, \textit{bigram} and \textit{trigram} models. 
+% In the following we will learn how to design better models.
 
 \subsection{Recurrent Neural Networks}
 
@@ -134,24 +138,16 @@ Let us take a look at a multilayer perceptron with a single hidden layer. Given 
 
 $$\mathbf{H} = \phi(\mathbf{X} \mathbf{W}_{xh} + \mathbf{b}_h).$$
 
-Here, we have the weight parameter $\mathbf{W}_{xh} \in \mathbb{R}^{d \times
-h}$, bias parameter $\mathbf{b}_h \in \mathbb{R}^{1 \times h}$, and the number
-of hidden units $h$, for the hidden layer. Recall that $\mathbf{b}_h$ is just a
-vector - its values are replicated using the broadcasting mechanism to match those of the matrix-matrix product.
+Here, we have the weight parameter $\mathbf{W}_{xh} \in \mathbb{R}^{d \times h}$, bias parameter $\mathbf{b}_h \in \mathbb{R}^{1 \times h}$, and the number of hidden units $h$, for the hidden layer. 
+% Recall that $\mathbf{b}_h$ is just a vector - its values are replicated using the broadcasting mechanism to match those of the matrix-matrix product.
 
-Also note that hidden \textbf{state} and hidden \textbf{layer} refer to two very different concepts. Hidden layers are, as explained, layers that are hidden from view on the path from input to output. Hidden states are technically speaking inputs' to whatever we do at a given step. Instead, they can only be computed by looking at data at previous iterations. In this sense they have much in common with latent variable models in statistics, such as clustering or topic models where e.g. the cluster ID affects the output but cannot be directly observed.
+Also note that hidden \textbf{state} and hidden \textbf{layer} refer to two very different concepts. Hidden layers are layers that are hidden from view on the path from input to output. Hidden states are technically speaking inputs to whatever we do at a given step. Instead, they can only be computed by looking at data at previous iterations. In this sense they have much in common with latent variable models in statistics, such as clustering or topic models where e.g. the cluster ID affects the output but cannot be directly observed.
 
 The hidden variable $\mathbf{H}$ is used as the input of the output layer. For classification purposes, such as predicting the next character, the output dimensionality $q$ might e.g. match the number of categories in the classification problem. Lastly the output layer is given by
 
 $$\mathbf{O} = \mathbf{H} \mathbf{W}_{hq} + \mathbf{b}_q.$$
 
-Here, $\mathbf{O} \in \mathbb{R}^{n \times q}$ is the output variable,
-$\mathbf{W}_{hq} \in \mathbb{R}^{h \times q}$ is the weight parameter, and
-$\mathbf{b}_q \in \mathbb{R}^{1 \times q}$ is the bias parameter of the output
-layer.  If it is a classification problem, we can use
-$\text{softmax}(\mathbf{O})$ to compute the probability distribution of the
-output category. This is entirely analogous to the regression problem we solved
-previously in \cref{subsec:sequence_models}, hence we omit details. Suffice it to say that we can pick $(w_t, w_{t-1})$ pairs at random and estimate the parameters $\mathbf{W}$ and $\mathbf{b}$ of our network via autograd and stochastic gradient descent.
+Here, $\mathbf{O} \in \mathbb{R}^{n \times q}$ is the output variable, $\mathbf{W}_{hq} \in \mathbb{R}^{h \times q}$ is the weight parameter, and $\mathbf{b}_q \in \mathbb{R}^{1 \times q}$ is the bias parameter of the output layer.  If it is a classification problem, we can use $\text{softmax}(\mathbf{O})$ to compute the probability distribution of the output category. This is entirely analogous to the regression problem we solved previously in \cref{subsec:sequence_models}, hence we omit details. Suffice it to say that we can pick $(w_t, w_{t-1})$ pairs at random and estimate the parameters $\mathbf{W}$ and $\mathbf{b}$ of our network via autograd and stochastic gradient descent.
 
 \subsubsection{Recurrent Networks with Hidden States}
 
@@ -171,7 +167,7 @@ RNN parameters include the weight $\mathbf{W}_{xh} \in \mathbb{R}^{d \times h}, 
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/rnn.svg}
+	\includesvg[scale=0.5]{images/ch3/rnn.svg}
 	\caption{An RNN with a hidden state.}
 	\label{fig:rnn}
 \end{figure}
@@ -186,25 +182,25 @@ We conclude this section by illustrating how RNNs can be used to build a languag
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/rnn-train.svg}
+	\includesvg[scale=0.8]{images/ch3/rnn-train.svg}
 	\caption{Word-level RNN language model. The input and label sequences are The Time Machine by H. and Time Machine by H. G. respectively.}
 	\label{fig:rnn-train}
 \end{figure}
 
 
-The number of words is huge compared to the number of characters. This is why quite often (such as in the subsequent sections) we will use a character-level RNN instead. In the next few sections, we will introduce its implementation.
+The number of words is huge compared to the number of characters. This is why quite often we will use a character-level RNN instead.
 
-\subsection{Text Preprocessing}
+% \subsection{Text Preprocessing}
 
-In the previous section we discussed some properties that make language unique. The key is that the number of tokens (aka words) is large and very unevenly distributed. Hence, a naive multiclass classification approach to predict the next symbol doesn’t always work very well. Moreover, we need to turn text into a format that we can optimize over, i.e. we need to map it to vectors. At its extreme we have two alternatives. One is to treat each word as a unique entity, e.g. [11]. The problem with this strategy is that we might well have to deal with 100,000 to 1,000,000 vectors for very large and diverse corpora.
+% \subsubsection{Tokenization and vocabulary building}
 
-At the other extreme lies the strategy to predict one character at a time, as suggested e.g. by \citet{Ling2015}. A good balance in between both strategies is byte-pair encoding, as described by \citet{Sennrich2016} for the purpose of neural machine translation. It decomposes text into syllable-like fragments that occur frequently. This allows for models that are able to generate words like heteroscedastic or pentagram based on previously viewed words, e.g. heterogeneous, homoscedastic, diagram, and pentagon. Going into details of these models is beyond the scope of the current chapter. 
+% In the previous section we discussed some properties that make language unique. The key is that the number of tokens (aka words) is large and very unevenly distributed. Hence, a naive multiclass classification approach to predict the next symbol doesn’t always work very well. Moreover, we need to turn text into a format that we can optimize over, i.e. we need to map it to vectors. At its extreme we have two alternatives. One is to treat each word as a unique entity, e.g. \citep{Salton1975}. The problem with this strategy is that we might well have to deal with 100,000 to 1,000,000 vectors for very large and diverse corpora.
 
-\subsubsection{Tokenization and vocabulary building}
+% At the other extreme lies the strategy to predict one character at a time, as suggested e.g. by \citet{Ling2015}. A good balance in between both strategies is byte-pair encoding, as described by \citet{Sennrich2016} for the purpose of neural machine translation. It decomposes text into syllable-like fragments that occur frequently. This allows for models that are able to generate words like heteroscedastic or pentagram based on previously viewed words, e.g. heterogeneous, homoscedastic, diagram, and pentagon. Going into details of these models is beyond the scope of the current chapter. 
 
-Next we need to split the dataset, a string, into tokens. A token is a data point the model will train and predict. We common use a word or a character as a token.
+% Next we need to split the dataset, a string, into tokens. A token is a data point the model will train and predict. We commonly use a word or a character as a token.
 
-Then we need to map tokens into numerical indices. We often call it a vocabulary. Its input is a list of tokens, called a corpus. Then it counts the frequency of each token in this corpus, and then assigns an numerical index to each token according to its frequency. Rarely appeared tokens are often removed to reduce the complexity. A token doesn’t exist in corpus or has been removed is mapped into a special unknown ("<unk>") token. We optionally add another three special tokens: "<pad>" a token for padding, "<bos>" to present the beginning for a sentence, and "<eos>" for the ending of a sentence.
+% Then we need to map tokens into numerical indices. We often call it a vocabulary. Its input is a list of tokens, called a corpus. Then it counts the frequency of each token in this corpus, and then assigns an numerical index to each token according to its frequency. Rarely appeared tokens are often removed to reduce the complexity. A token doesn’t exist in corpus or has been removed is mapped into a special unknown ("<unk>") token. We optionally add another three special tokens: "<pad>" a token for padding, "<bos>" to present the beginning for a sentence, and "<eos>" for the ending of a sentence.
 
 % \subsubsection{Sampling}
 
@@ -232,13 +228,14 @@ Then we need to map tokens into numerical indices. We often call it a vocabulary
 % One-hot encoding vectors provide an easy way to express words as vectors in order to process them in a deep network. In a nutshell, we map each word to a different unit vector: assume that the number of different characters in the dictionary is N and each character has a one-to-one correspondence with a single value in the index of successive integers from 0 to N-1. If the index of a character is the integer i, then we create a vector $\mathbf{e}_i$ of all 0s with a length of N and set the element at position i to 1. This vector is the one-hot vector of the original character. The one-hot vectors with indices 0 and 2 are shown below (the length of the vector is equal to the dictionary size).
 
 
-\subsection{Training Recurrent Networks: Backpropagation Through Time}
+\subsection{Training Recurrent Networks: Backpropagation Through Time (BPTT)}
 
 In this section we will delve a bit more deeply into the details of backpropagation for sequence models and why (and how) the math works.
 
 Forward propagation in a recurrent neural network is relatively straightforward. Back-propagation through time is actually a specific application of back propagation in recurrent neural networks. It requires us to expand the recurrent neural network one time step at a time to obtain the dependencies between model variables and parameters. Then, based on the chain rule, we apply back propagation to compute and store gradients. Since sequences can be rather long this means that the dependency can be rather lengthy. E.g. for a sequence of 1000 characters the first symbol could potentially have significant influence on the symbol at position 1000. This is not really computationally feasible (it takes too long and requires too much memory) and it requires over 1000 matrix-vector products before we would arrive at that very elusive gradient. This is a process fraught with computational and statistical uncertainty. In the following we will address what happens and how to address this in practice.
 
 \subsubsection{A Simplified Recurrent Network}
+
 We start with a simplified model of how an RNN works. This model ignores details about the specifics of the hidden state and how it is being updated. These details are immaterial to the analysis and would only serve to clutter the notation and make it look more intimidating.
 
 $$h_t = f(x_t, h_{t-1}, w) \text{ and } o_t = g(h_t, w)$$
@@ -269,7 +266,7 @@ This chain can get very long whenever $t$ is large. While we can use the chain r
 
 \textbf{Compute the full sum}. This is very slow and gradients can blow up, since subtle changes in the initial conditions can potentially affect the outcome a lot. That is, we could see things similar to the butterfly effect where minimal changes in the initial conditions lead to disproportionate changes in the outcome. This is actually quite undesirable in terms of the model that we want to estimate. After all, we are looking for robust estimators that generalize well. Hence this strategy is almost never used in practice.
 
-\textbf{Truncate the sum after $\tau$ steps}. This is what we’ve been discussing so far. This leads to an approximation of the true gradient, simply by terminating the sum above at $\partial_w h_{t-\tau}$. The approximation error is thus given by $\partial_h f(x_t, h_{t-1}, w) \partial_w h_{t-1}$ (multiplied by a product of gradients involving $\partial_h f$). In practice this works quite well. It is what is commonly referred to as truncated BPTT (backpropgation through time). One of the consequences of this is that the model focuses primarily on short-term influence rather than long-term consequences. This is actually desirable, since it biases the estimate towards simpler and more stable models.
+\textbf{Truncate the sum after $\tau$ steps}. This is what we have been discussing so far. This leads to an approximation of the true gradient, simply by terminating the sum above at $\partial_w h_{t-\tau}$. The approximation error is thus given by $\partial_h f(x_t, h_{t-1}, w) \partial_w h_{t-1}$ (multiplied by a product of gradients involving $\partial_h f$). In practice this works quite well. It is what is commonly referred to as truncated BPTT (backpropgation through time). One of the consequences of this is that the model focuses primarily on short-term influence rather than long-term consequences. This is actually desirable, since it biases the estimate towards simpler and more stable models.
 
 \subsubsection{The Computational Graph}
 
@@ -277,7 +274,7 @@ In order to visualize the dependencies between model variables and parameters du
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/rnn-bptt.svg}
+	\includesvg[scale=0.8]{images/ch3/rnn-bptt.svg}
 	\caption{Computational dependencies for a recurrent neural network model with three time steps. Boxes represent variables (not shaded) or parameters (shaded) and circles represent operators.}
 	\label{fig:rnn-bptt}
 \end{figure}
@@ -319,7 +316,7 @@ $$
 
 A number of things follow from this potentially very intimidating expression. Firstly, it pays to store intermediate results, i.e. powers of $\mathbf{W}_{hh}$ as we work our way through the terms of the loss function $L$. Secondly, this simple linear example already exhibits some key problems of long sequence models: it involves potentially very large powers $\mathbf{W}_{hh}^j$. In it, eigenvalues smaller than 1 vanish for large $j$ and eigenvalues larger than 1 diverge. This is numerically unstable and gives undue importance to potentially irrelevant past detail. One way to address this is to truncate the sum at a computationally convenient size. Later on in this chapter we will see how more sophisticated sequence models such as LSTMs can alleviate this further. In code, this truncation is effected by detaching the gradient after a given number of steps.
 
-\subsection{Gated Recurrent Units (GRU)}
+\subsection{Gated Recurrent Units (GRU)}\label{subsec:gru}
 
 In the previous section we discussed how gradients are calculated in a recurrent neural network. In particular we found that long products of matrices can lead to vanishing or divergent gradients. Let’s briefly think about what such gradient anomalies mean in practice:
 
@@ -340,7 +337,7 @@ We begin by engineering gates to generate these variables. \cref{fig:gru_1} illu
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/gru_1.svg}
+	\includesvg[scale=0.8]{images/ch3/gru_1.svg}
 	\caption{Reset and update gate in a GRU.}
 	\label{fig:gru_1}
 \end{figure}
@@ -371,7 +368,7 @@ $$\tilde{\mathbf{H}}_t = \tanh(\mathbf{X}_t \mathbf{W}_{xh} + \left(\mathbf{R}_t
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/gru_2.svg}
+	\includesvg[scale=0.8]{images/ch3/gru_2.svg}
 	\caption{Candidate hidden state computation in a GRU. The multiplication is carried out elementwise.}
 	\label{fig:gru_2}
 \end{figure}
@@ -384,7 +381,7 @@ $$\mathbf{H}_t = \mathbf{Z}_t \odot \mathbf{H}_{t-1}  + (1 - \mathbf{Z}_t) \odot
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/gru_3.svg}
+	\includesvg[scale=0.8]{images/ch3/gru_3.svg}
 	\caption{Hidden state computation in a GRU. As before, the multiplication is carried out elementwise.}
 	\label{fig:gru_3}
 \end{figure}
@@ -412,7 +409,7 @@ Just like with GRUs, the data feeding into the LSTM gates is the input at the cu
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/lstm_0.svg}
+	\includesvg[scale=0.8]{images/ch3/lstm_0.svg}
 	\caption{Calculation of input, forget, and output gates in an LSTM.}
 	\label{fig:lstm_0}
 \end{figure}
@@ -441,7 +438,7 @@ Here $\mathbf{W}_{xc} \in \mathbb{R}^{d \times h}$ and $\mathbf{W}_{hc} \in \mat
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/lstm_1.svg}
+	\includesvg[scale=0.8]{images/ch3/lstm_1.svg}
 	\caption{Computation of candidate memory cells in LSTM.}
 	\label{fig:lstm_1}
 \end{figure}
@@ -457,7 +454,7 @@ If the forget gate is always approximately 1 and the input gate is always approx
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/lstm_2.svg}
+	\includesvg[scale=0.8]{images/ch3/lstm_2.svg}
 	\caption{Computation of memory cells in an LSTM. Here, the multiplication is carried out element-wise.}
 	\label{fig:lstm_2}
 \end{figure}
@@ -470,144 +467,144 @@ $$\mathbf{H}_t = \mathbf{O}_t \odot \tanh(\mathbf{C}_t).$$
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/lstm_3.svg}
+	\includesvg[scale=0.8]{images/ch3/lstm_3.svg}
 	\caption{Computation of the hidden state. Multiplication is element-wise.}
 	\label{fig:lstm_3}
 \end{figure}
 
-\subsection{Deep Recurrent Neural Networks}
+% \subsection{Deep Recurrent Neural Networks}
 
-Up to now, we only discussed recurrent neural networks with a single unidirectional hidden layer. In it the specific functional form of how latent variables and observations interact was rather arbitrary. This isn't a big problem as long as we have enough flexibility to model different types of interactions. With a single layer, however, this can be quite challenging. In the case of the perceptron we fixed this problem by adding more layers. Within RNNs this is a bit more tricky, since we first need to decide how and where to add extra nonlinearity. Our discussion below focuses primarily on LSTMs but it applies to other sequence models, too.
+% Up to now, we only discussed recurrent neural networks with a single unidirectional hidden layer. In it the specific functional form of how latent variables and observations interact was rather arbitrary. This isn't a big problem as long as we have enough flexibility to model different types of interactions. With a single layer, however, this can be quite challenging. In the case of the perceptron we fixed this problem by adding more layers. Within RNNs this is a bit more tricky, since we first need to decide how and where to add extra nonlinearity. Our discussion below focuses primarily on LSTMs but it applies to other sequence models, too.
 
-\begin{itemize}
-    \item We could add extra nonlinearity to the gating mechansims. That is, instead of using a single perceptron we could use multiple layers. This leaves the \textit{mechanism} of the LSTM unchanged. Instead it makes it more sophisticated. This would make sense if we were led to believe that the LSTM mechanism describes some form of universal truth of how latent variable autoregressive models work.
-    \item We could stack multiple layers of LSTMs on top of each other. This results in a mechanism that is more flexible, due to the combination of several simple layers. In particular, data might be relevant at different levels of the stack. For instance, we might want to keep high-level data about financial market conditions (bear or bull market) available at a high level, whereas at a lower level we only record shorter-term temporal dynamics.
-\end{itemize}
+% \begin{itemize}
+%     \item We could add extra nonlinearity to the gating mechansims. That is, instead of using a single perceptron we could use multiple layers. This leaves the \textit{mechanism} of the LSTM unchanged. Instead it makes it more sophisticated. This would make sense if we were led to believe that the LSTM mechanism describes some form of universal truth of how latent variable autoregressive models work.
+%     \item We could stack multiple layers of LSTMs on top of each other. This results in a mechanism that is more flexible, due to the combination of several simple layers. In particular, data might be relevant at different levels of the stack. For instance, we might want to keep high-level data about financial market conditions (bear or bull market) available at a high level, whereas at a lower level we only record shorter-term temporal dynamics.
+% \end{itemize}
 
-Beyond all this abstract discussion it is probably easiest to understand the family of models we are interested in by reviewing the diagram below. It describes a deep recurrent neural network with $L$ hidden layers. Each hidden state is continuously passed to the next time step of the current layer and the next layer of the current time step.
+% Beyond all this abstract discussion it is probably easiest to understand the family of models we are interested in by reviewing the diagram below. It describes a deep recurrent neural network with $L$ hidden layers. Each hidden state is continuously passed to the next time step of the current layer and the next layer of the current time step.
 
-\begin{figure}[hpt]
-	\centering
-	\includesvg{images/ch3/deep-rnn.svg}
-	\caption{Architecture of a deep recurrent neural network.}
-	\label{fig:deep-rnn}
-\end{figure}
+% \begin{figure}[hpt]
+% 	\centering
+% 	\includesvg[scale=0.8]{images/ch3/deep-rnn.svg}
+% 	\caption{Architecture of a deep recurrent neural network.}
+% 	\label{fig:deep-rnn}
+% \end{figure}
 
-\subsubsection{Functional Dependencies}
+% \subsubsection{Functional Dependencies}
 
-At time step $t$ we assume that we have a minibatch $\mathbf{X}_t \in \mathbb{R}^{n \times d}$ (number of examples: $n$, number of inputs: $d$). The hidden state of hidden layer $\ell$ ($\ell=1,\ldots,T$) is $\mathbf{H}_t^{(\ell)}  \in \mathbb{R}^{n \times h}$ (number of hidden units: $h$), the output layer variable is $\mathbf{O}_t \in \mathbb{R}^{n \times q}$ (number of outputs: $q$) and a hidden layer activation function $f_l$ for layer $l$. We compute the hidden state of layer $1$ as before, using $\mathbf{X}_t$ as input. For all subsequent layers the hidden state of the previous layer is used in its place.
+% At time step $t$ we assume that we have a minibatch $\mathbf{X}_t \in \mathbb{R}^{n \times d}$ (number of examples: $n$, number of inputs: $d$). The hidden state of hidden layer $\ell$ ($\ell=1,\ldots,T$) is $\mathbf{H}_t^{(\ell)}  \in \mathbb{R}^{n \times h}$ (number of hidden units: $h$), the output layer variable is $\mathbf{O}_t \in \mathbb{R}^{n \times q}$ (number of outputs: $q$) and a hidden layer activation function $f_l$ for layer $l$. We compute the hidden state of layer $1$ as before, using $\mathbf{X}_t$ as input. For all subsequent layers the hidden state of the previous layer is used in its place.
 
-$$\begin{aligned}
-\mathbf{H}_t^{(1)} & = f_1\left(\mathbf{X}_t, \mathbf{H}_{t-1}^{(1)}\right) \\
-\mathbf{H}_t^{(l)} & = f_l\left(\mathbf{H}_t^{(l-1)}, \mathbf{H}_{t-1}^{(l)}\right)
-\end{aligned}$$
+% $$\begin{aligned}
+% \mathbf{H}_t^{(1)} & = f_1\left(\mathbf{X}_t, \mathbf{H}_{t-1}^{(1)}\right) \\
+% \mathbf{H}_t^{(l)} & = f_l\left(\mathbf{H}_t^{(l-1)}, \mathbf{H}_{t-1}^{(l)}\right)
+% \end{aligned}$$
 
-Finally, the output of the output layer is only based on the hidden state of hidden layer $L$. We use the output function $g$ to address this:
+% Finally, the output of the output layer is only based on the hidden state of hidden layer $L$. We use the output function $g$ to address this:
 
-$$\mathbf{O}_t = g \left(\mathbf{H}_t^{(L)}\right)$$
+% $$\mathbf{O}_t = g \left(\mathbf{H}_t^{(L)}\right)$$
 
-Just as with multilayer perceptrons, the number of hidden layers $L$ and number of hidden units $h$ are hyper parameters. In particular, we can pick a regular RNN, a GRU or an LSTM to implement the model.
+% Just as with multilayer perceptrons, the number of hidden layers $L$ and number of hidden units $h$ are hyper parameters. In particular, we can pick a regular RNN, a GRU or an LSTM to implement the model.
 
-\subsection{Bidirectional Recurrent Neural Networks}
+% \subsection{Bidirectional Recurrent Neural Networks}
 
-So far we assumed that our goal is to model the next word given what we've seen so far, e.g. in the context of a time series or in the context of a language model. While this is a typical scenario, it is not the only one we might encounter. To illustrate the issue, consider the following three tasks of filling in the blanks in a text:
+% So far we assumed that our goal is to model the next word given what we've seen so far, e.g. in the context of a time series or in the context of a language model. While this is a typical scenario, it is not the only one we might encounter. To illustrate the issue, consider the following three tasks of filling in the blanks in a text:
 
-\begin{verbatim}
-I am _____
-I am _____ very hungry.
-I am _____ very hungry, I could eat half a pig.    
-\end{verbatim}
+% \begin{verbatim}
+% I am _____
+% I am _____ very hungry.
+% I am _____ very hungry, I could eat half a pig.    
+% \end{verbatim}
 
-Depending on the amount of information available we might fill the blanks with very different words such as 'happy', 'not', and 'very'. Clearly the end of the phrase (if available) conveys significant information about which word to pick. A sequence model that is incapable of taking advantage of this will perform poorly on related tasks. For instance, to do well in named entity recognition (e.g. to recognize whether 'Green' refers to 'Mr. Green' or to the color) longer-range context is equally vital. To get some inspiration for addressing the problem let's take a detour to graphical models.
+% Depending on the amount of information available we might fill the blanks with very different words such as 'happy', 'not', and 'very'. Clearly the end of the phrase (if available) conveys significant information about which word to pick. A sequence model that is incapable of taking advantage of this will perform poorly on related tasks. For instance, to do well in named entity recognition (e.g. to recognize whether 'Green' refers to 'Mr. Green' or to the color) longer-range context is equally vital. To get some inspiration for addressing the problem let's take a detour to graphical models.
 
-\subsubsection{Dynamic Programming}
+% \subsubsection{Dynamic Programming}
 
-This section serves to illustrate the problem. The specific technical details do not matter for understanding the deep learning counterpart but they help in motivating why one might use deep learning and why one might pick specific architectures.
+% This section serves to illustrate the problem. The specific technical details do not matter for understanding the deep learning counterpart but they help in motivating why one might use deep learning and why one might pick specific architectures.
 
-If we want to solve the problem using graphical models we could for instance design a latent variable model as follows: we assume that there exists some latent variable $h_t$ which governs the emissions $x_t$ that we observe via $p(x_t|h_t)$. Moreover, the transitions $h_t \to h_{t+1}$ are given by some state transition probability $p(h_t|h_{t-1})$. The graphical model then looks as follows:
+% If we want to solve the problem using graphical models we could for instance design a latent variable model as follows: we assume that there exists some latent variable $h_t$ which governs the emissions $x_t$ that we observe via $p(x_t|h_t)$. Moreover, the transitions $h_t \to h_{t+1}$ are given by some state transition probability $p(h_t|h_{t-1})$. The graphical model then looks as follows:
 
-\begin{figure}[hpt]
-	\centering
-	\includesvg{images/ch3/hmm.svg}
-	\caption{Hidden Markov Model.}
-	\label{fig:hmm}
-\end{figure}
+% \begin{figure}[hpt]
+% 	\centering
+% 	\includesvg[scale=0.8]{images/ch3/hmm.svg}
+% 	\caption{Hidden Markov Model.}
+% 	\label{fig:hmm}
+% \end{figure}
 
-For a sequence of $T$ observations we have thus the following joint probability distribution over observed and hidden states:
+% For a sequence of $T$ observations we have thus the following joint probability distribution over observed and hidden states:
 
-$$p(x,h) = p(h_1) p(x_1|h_1) \prod_{i=2}^T p(h_t|h_{t-1}) p(x_t|h_t)$$
+% $$p(x,h) = p(h_1) p(x_1|h_1) \prod_{i=2}^T p(h_t|h_{t-1}) p(x_t|h_t)$$
 
-Now assume that we observe all $x_i$ with the exception of some $x_j$ and it is our goal to compute $p(x_j|x^{-j})$. To accomplish this we need to sum over all possible choices of $h = (h_1, \ldots, h_T)$. In case $h_i$ can take on $k$ distinct values this means that we need to sum over $k^T$ terms - mission impossible! Fortunately there's an elegant solution for this: \textbf{dynamic programming}. To see how it works consider summing over the first two hidden variable $h_1$ and $h_2$. This yields:
+% Now assume that we observe all $x_i$ with the exception of some $x_j$ and it is our goal to compute $p(x_j|x^{-j})$. To accomplish this we need to sum over all possible choices of $h = (h_1, \ldots, h_T)$. In case $h_i$ can take on $k$ distinct values this means that we need to sum over $k^T$ terms - mission impossible! Fortunately there's an elegant solution for this: \textbf{dynamic programming}. To see how it works consider summing over the first two hidden variable $h_1$ and $h_2$. This yields:
 
-$$\begin{aligned}
-    p(x) & = \sum_h p(h_1) p(x_1|h_1) \prod_{i=2}^T p(h_t|h_{t-1}) p(x_t|h_t) \\
-    & = \sum_{h_2, \ldots h_T} \underbrace{\left[\sum_{h_1} p(h_1) p(x_1|h_1) p(h_2|h_1)\right]}_{=: \pi_2(h_2)}
-    p(x_2|h_2) \prod_{i=2}^T p(h_t|h_{t-1}) p(x_t|h_t) \\
-    & = \sum_{h_3, \ldots h_T} \underbrace{\left[\sum_{h_2} \pi_2(h_2) p(x_2|h_2) p(h_3|h_2)\right]}_{=: \pi_3(h_3)}
-    p(x_3|h_3) \prod_{i=3}^T p(h_t|h_{t-1}) p(x_t|h_t)
-\end{aligned}$$
+% $$\begin{aligned}
+%     p(x) & = \sum_h p(h_1) p(x_1|h_1) \prod_{i=2}^T p(h_t|h_{t-1}) p(x_t|h_t) \\
+%     & = \sum_{h_2, \ldots h_T} \underbrace{\left[\sum_{h_1} p(h_1) p(x_1|h_1) p(h_2|h_1)\right]}_{=: \pi_2(h_2)}
+%     p(x_2|h_2) \prod_{i=2}^T p(h_t|h_{t-1}) p(x_t|h_t) \\
+%     & = \sum_{h_3, \ldots h_T} \underbrace{\left[\sum_{h_2} \pi_2(h_2) p(x_2|h_2) p(h_3|h_2)\right]}_{=: \pi_3(h_3)}
+%     p(x_3|h_3) \prod_{i=3}^T p(h_t|h_{t-1}) p(x_t|h_t)
+% \end{aligned}$$
 
-In general we have the \textit{forward} recursion
+% In general we have the \textit{forward} recursion
 
-$$\pi_{t+1}(h_{t+1}) = \sum_{h_t} \pi_t(h_t) p(x_t|h_t) p(h_{t+1}|h_1)$$
+% $$\pi_{t+1}(h_{t+1}) = \sum_{h_t} \pi_t(h_t) p(x_t|h_t) p(h_{t+1}|h_1)$$
 
-The recursion is initialized as $\pi_1(h_1) = p(h_1)$. In abstract terms this can be written as $\pi_{t+1} = f(\pi_t, x_t)$, where $f$ is some learned function. This looks very much like the update equation in the hidden variable models we discussed so far in the context of RNNs. Entirely analogously to the forward recursion we can also start a backwards recursion. This yields:
+% The recursion is initialized as $\pi_1(h_1) = p(h_1)$. In abstract terms this can be written as $\pi_{t+1} = f(\pi_t, x_t)$, where $f$ is some learned function. This looks very much like the update equation in the hidden variable models we discussed so far in the context of RNNs. Entirely analogously to the forward recursion we can also start a backwards recursion. This yields:
 
-$$\begin{aligned}
-    p(x) & = \sum_h \prod_{i=1}^{T-1} p(h_t|h_{t-1}) p(x_t|h_t) \cdot p(h_T|h_{T-1}) p(x_T|h_T) \\
-    & = \sum_{h_1, \ldots h_{T-1}} \prod_{i=1}^{T-1} p(h_t|h_{t-1}) p(x_t|h_t) \cdot
-    \underbrace{\left[\sum_{h_T} p(h_T|h_{T-1}) p(x_T|h_T)\right]}_{=: \rho_{T-1}(h_{T-1})} \\
-    & = \sum_{h_1, \ldots h_{T-2}} \prod_{i=1}^{T-2} p(h_t|h_{t-1}) p(x_t|h_t) \cdot
-    \underbrace{\left[\sum_{h_{T-1}} p(h_{T-1}|h_{T-2}) p(x_{T-1}|h_{T-1})\right]}_{=: \rho_{T-2}(h_{T-2})}
-\end{aligned}$$
+% $$\begin{aligned}
+%     p(x) & = \sum_h \prod_{i=1}^{T-1} p(h_t|h_{t-1}) p(x_t|h_t) \cdot p(h_T|h_{T-1}) p(x_T|h_T) \\
+%     & = \sum_{h_1, \ldots h_{T-1}} \prod_{i=1}^{T-1} p(h_t|h_{t-1}) p(x_t|h_t) \cdot
+%     \underbrace{\left[\sum_{h_T} p(h_T|h_{T-1}) p(x_T|h_T)\right]}_{=: \rho_{T-1}(h_{T-1})} \\
+%     & = \sum_{h_1, \ldots h_{T-2}} \prod_{i=1}^{T-2} p(h_t|h_{t-1}) p(x_t|h_t) \cdot
+%     \underbrace{\left[\sum_{h_{T-1}} p(h_{T-1}|h_{T-2}) p(x_{T-1}|h_{T-1})\right]}_{=: \rho_{T-2}(h_{T-2})}
+% \end{aligned}$$
 
-We can thus write the \textit{backward} recursion as
+% We can thus write the \textit{backward} recursion as
 
-$$\rho_{t-1}(h_{t-1})= \sum_{h_{t}} p(h_{t}|h_{t-1}) p(x_{t}|h_{t})$$
+% $$\rho_{t-1}(h_{t-1})= \sum_{h_{t}} p(h_{t}|h_{t-1}) p(x_{t}|h_{t})$$
 
-with initialization $\rho_T(h_T) = 1$. These two recursions allow us to sum over $T$ variables in $O(kT)$ (linear) time over all values of $(h_1, \ldots h_T)$ rather than in exponential time. This is one of the great benefits of probabilistic inference with graphical models. It is a very special instance of the [Generalized Distributive Law](https://authors.library.caltech.edu/1541/1/AJIieeetit00.pdf) proposed in 2000 by Aji and McEliece. Combining both forward and backward pass we are able to compute
+% with initialization $\rho_T(h_T) = 1$. These two recursions allow us to sum over $T$ variables in $O(kT)$ (linear) time over all values of $(h_1, \ldots h_T)$ rather than in exponential time. This is one of the great benefits of probabilistic inference with graphical models. It is a very special instance of the [Generalized Distributive Law](https://authors.library.caltech.edu/1541/1/AJIieeetit00.pdf) proposed in 2000 by Aji and McEliece. Combining both forward and backward pass we are able to compute
 
-$$p(x_j|x_{-j}) \propto \sum_{h_j} \pi_j(h_j) \rho_j(h_j) p(x_j|h_j).$$
+% $$p(x_j|x_{-j}) \propto \sum_{h_j} \pi_j(h_j) \rho_j(h_j) p(x_j|h_j).$$
 
-Note that in abstract terms the backward recursion can be written as $\rho_{t-1} = g(\rho_t, x_t)$, where $g$ is some learned function. Again, this looks very much like an update equation, just running backwards unlike what we've seen so far in RNNs. And, indeed, HMMs benefit from knowing future data when it is available. Signal processing scientists distinguish between the two cases of knowing and not knowing future observations as filtering vs. smoothing.
+% Note that in abstract terms the backward recursion can be written as $\rho_{t-1} = g(\rho_t, x_t)$, where $g$ is some learned function. Again, this looks very much like an update equation, just running backwards unlike what we've seen so far in RNNs. And, indeed, HMMs benefit from knowing future data when it is available. Signal processing scientists distinguish between the two cases of knowing and not knowing future observations as filtering vs. smoothing.
 
-\subsubsection{Bidirectional Model}
+% \subsubsection{Bidirectional Model}
 
-If we want to have a mechanism in RNNs that offers comparable look-ahead ability as in HMMs we need to modify the recurrent net design we’ve seen so far. Fortunately this is easy (conceptually). Instead of running an RNN only in forward mode starting from the first symbol we start another one from the last symbol running back to front. Bidirectional recurrent neural networks add a hidden layer that passes information in a backward direction to more flexibly process such information. The figure below illustrates the architecture of a bidirectional recurrent neural network with a single hidden layer.
+% If we want to have a mechanism in RNNs that offers comparable look-ahead ability as in HMMs we need to modify the recurrent net design we’ve seen so far. Fortunately this is easy (conceptually). Instead of running an RNN only in forward mode starting from the first symbol we start another one from the last symbol running back to front. Bidirectional recurrent neural networks add a hidden layer that passes information in a backward direction to more flexibly process such information. The figure below illustrates the architecture of a bidirectional recurrent neural network with a single hidden layer.
 
-\begin{figure}[hpt]
-	\centering
-	\includesvg{images/ch3/birnn.svg}
-	\caption{Architecture of a bidirectional recurrent neural network.}
-	\label{fig:birnn}
-\end{figure}
+% \begin{figure}[hpt]
+% 	\centering
+% 	\includesvg{images/ch3/birnn.svg}
+% 	\caption{Architecture of a bidirectional recurrent neural network.}
+% 	\label{fig:birnn}
+% \end{figure}
 
-In fact, this is not too dissimilar to the forward and backward recurrences we encountered above. The main distinction is that in the previous case these equations had a specific statistical meaning. Now they’re devoid of such easily accessible interpretation and we can just treat them as generic functions. This transition epitomizes many of the principles guiding the design of modern deep networks - use the type of functional dependencies common to classical statistical models and use them in a generic form.
+% In fact, this is not too dissimilar to the forward and backward recurrences we encountered above. The main distinction is that in the previous case these equations had a specific statistical meaning. Now they’re devoid of such easily accessible interpretation and we can just treat them as generic functions. This transition epitomizes many of the principles guiding the design of modern deep networks - use the type of functional dependencies common to classical statistical models and use them in a generic form.
 
-\paragraph{Definition}
+% \paragraph{Definition}
 
-Bidirectional RNNs were introduced by \citet{Schuster1997}. For a detailed discussion of the various architectures see also the paper by \citet{Graves2005}. Let's look at the specifics of such a network. For a given time step $t$, the mini-batch input is $\mathbf{X}_t \in \mathbb{R}^{n \times d}$ (number of examples: $n$, number of inputs: $d$) and the hidden layer activation function is $\phi$. In the bidirectional architecture:
-We assume that the forward and backward hidden states for this time step are $\overrightarrow{\mathbf{H}}_t  \in \mathbb{R}^{n \times h}$ and $\overleftarrow{\mathbf{H}}_t  \in \mathbb{R}^{n \times h}$ respectively. Here $h$ indicates the number of hidden units. We compute the forward and backward hidden state updates as follows:
+% Bidirectional RNNs were introduced by \citet{Schuster1997}. For a detailed discussion of the various architectures see also the paper by \citet{Graves2005}. Let's look at the specifics of such a network. For a given time step $t$, the mini-batch input is $\mathbf{X}_t \in \mathbb{R}^{n \times d}$ (number of examples: $n$, number of inputs: $d$) and the hidden layer activation function is $\phi$. In the bidirectional architecture:
+% We assume that the forward and backward hidden states for this time step are $\overrightarrow{\mathbf{H}}_t  \in \mathbb{R}^{n \times h}$ and $\overleftarrow{\mathbf{H}}_t  \in \mathbb{R}^{n \times h}$ respectively. Here $h$ indicates the number of hidden units. We compute the forward and backward hidden state updates as follows:
 
-$$
-\begin{aligned}
-\overrightarrow{\mathbf{H}}_t &= \phi(\mathbf{X}_t \mathbf{W}_{xh}^{(f)} + \overrightarrow{\mathbf{H}}_{t-1} \mathbf{W}_{hh}^{(f)}  + \mathbf{b}_h^{(f)}),\\
-\overleftarrow{\mathbf{H}}_t &= \phi(\mathbf{X}_t \mathbf{W}_{xh}^{(b)} + \overleftarrow{\mathbf{H}}_{t+1} \mathbf{W}_{hh}^{(b)}  + \mathbf{b}_h^{(b)}),
-\end{aligned}
-$$
+% $$
+% \begin{aligned}
+% \overrightarrow{\mathbf{H}}_t &= \phi(\mathbf{X}_t \mathbf{W}_{xh}^{(f)} + \overrightarrow{\mathbf{H}}_{t-1} \mathbf{W}_{hh}^{(f)}  + \mathbf{b}_h^{(f)}),\\
+% \overleftarrow{\mathbf{H}}_t &= \phi(\mathbf{X}_t \mathbf{W}_{xh}^{(b)} + \overleftarrow{\mathbf{H}}_{t+1} \mathbf{W}_{hh}^{(b)}  + \mathbf{b}_h^{(b)}),
+% \end{aligned}
+% $$
 
-Here, the weight parameters $\mathbf{W}_{xh}^{(f)} \in \mathbb{R}^{d \times h}, \mathbf{W}_{hh}^{(f)} \in \mathbb{R}^{h \times h}, \mathbf{W}_{xh}^{(b)} \in \mathbb{R}^{d \times h}, and \mathbf{W}_{hh}^{(b)} \in \mathbb{R}^{h \times h}$ and bias parameters $\mathbf{b}_h^{(f)} \in \mathbb{R}^{1 \times h} and \mathbf{b}_h^{(b)} \in \mathbb{R}^{1 \times h}$ are all model parameters.
+% Here, the weight parameters $\mathbf{W}_{xh}^{(f)} \in \mathbb{R}^{d \times h}, \mathbf{W}_{hh}^{(f)} \in \mathbb{R}^{h \times h}, \mathbf{W}_{xh}^{(b)} \in \mathbb{R}^{d \times h}, and \mathbf{W}_{hh}^{(b)} \in \mathbb{R}^{h \times h}$ and bias parameters $\mathbf{b}_h^{(f)} \in \mathbb{R}^{1 \times h} and \mathbf{b}_h^{(b)} \in \mathbb{R}^{1 \times h}$ are all model parameters.
 
-Then we concatenate the forward and backward hidden states $\overrightarrow{\mathbf{H}}_t$ and $\overleftarrow{\mathbf{H}}_t$ to obtain the hidden state $\mathbf{H}_t \in \mathbb{R}^{n \times 2h}$ and input it to the output layer. In deep bidirectional RNNs the information is passed on as input to the next bidirectional layer. Lastly, the output layer computes the output $\mathbf{O}_t \in \mathbb{R}^{n \times q}$ (number of outputs: $q$):
+% Then we concatenate the forward and backward hidden states $\overrightarrow{\mathbf{H}}_t$ and $\overleftarrow{\mathbf{H}}_t$ to obtain the hidden state $\mathbf{H}_t \in \mathbb{R}^{n \times 2h}$ and input it to the output layer. In deep bidirectional RNNs the information is passed on as input to the next bidirectional layer. Lastly, the output layer computes the output $\mathbf{O}_t \in \mathbb{R}^{n \times q}$ (number of outputs: $q$):
 
-$$\mathbf{O}_t = \mathbf{H}_t \mathbf{W}_{hq} + \mathbf{b}_q,$$
+% $$\mathbf{O}_t = \mathbf{H}_t \mathbf{W}_{hq} + \mathbf{b}_q,$$
 
-Here, the weight parameter $\mathbf{W}_{hq} \in \mathbb{R}^{2h \times q}$ and bias parameter $\mathbf{b}_q \in \mathbb{R}^{1 \times q}$ are the model parameters of the output layer. The two directions can have different numbers of hidden units.
+% Here, the weight parameter $\mathbf{W}_{hq} \in \mathbb{R}^{2h \times q}$ and bias parameter $\mathbf{b}_q \in \mathbb{R}^{1 \times q}$ are the model parameters of the output layer. The two directions can have different numbers of hidden units.
 
-\paragraph{Computational Cost and Applications}
+% \paragraph{Computational Cost and Applications}
 
-One of the key features of a bidirectional RNN is that information from both ends of the sequence is used to estimate the output. That is, we use information from future and past observations to predict the current one (a smoothing scenario). In the case of language models this isn't quite what we want. After all, we don't have the luxury of knowing the next to next symbol when predicting the next one. Hence, if we were to use a bidirectional RNN naively we wouldn't get very good accuracy: during training we have past and future data to estimate the present. During test time we only have past data and thus poor accuracy (we will illustrate this in an experiment below).
+% One of the key features of a bidirectional RNN is that information from both ends of the sequence is used to estimate the output. That is, we use information from future and past observations to predict the current one (a smoothing scenario). In the case of language models this isn't quite what we want. After all, we don't have the luxury of knowing the next to next symbol when predicting the next one. Hence, if we were to use a bidirectional RNN naively we wouldn't get very good accuracy: during training we have past and future data to estimate the present. During test time we only have past data and thus poor accuracy (we will illustrate this in an experiment below).
 
-To add insult to injury bidirectional RNNs are also exceedingly slow. The main reason for this is that they require both a forward and a backward pass and that the backward pass is dependent on the outcomes of the forward pass. Hence gradients will have a very long dependency chain.
+% To add insult to injury bidirectional RNNs are also exceedingly slow. The main reason for this is that they require both a forward and a backward pass and that the backward pass is dependent on the outcomes of the forward pass. Hence gradients will have a very long dependency chain.
 
-In practice bidirectional layers are used very sparingly and only for a narrow set of applications, such as filling in missing words, annotating tokens (e.g. for named entity recognition), or encoding sequences wholesale as a step in a sequence processing pipeline (e.g. for machine translation). In short, handle with care!
+% In practice bidirectional layers are used very sparingly and only for a narrow set of applications, such as filling in missing words, annotating tokens (e.g. for named entity recognition), or encoding sequences wholesale as a step in a sequence processing pipeline (e.g. for machine translation). In short, handle with care!

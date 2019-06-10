@@ -56,7 +56,7 @@ This architecture was originally referred to as a Long-term Recurrent Convolutio
 	\centering
 	\includegraphics[scale=0.3]{images/ch3/cnn-rnn.png}
 	\caption{Encoder-decoder combining CNN and LSTM for image captionign. Source:  \href{https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/03-advanced/image_captioning}{Yunjey Choi's implementation} of the Show and Tell model \citep{Vinyals2015}, the Neural Talk and others}
-	\label{fig:cnn-rnn-enco-deco}
+	\label{fig:cnn-rnn}
 \end{figure}
 
 A key of this architecture is the use of a CNN that is pre-trained on a challenging image classification task, which is re-purposed as a feature extractor for the caption generating problem (this is called \textit{transfer learning}). Typically, a CNN trained on the ImageNet dataset is used for this purpose.

@@ -60,7 +60,7 @@ $$p(x_1, \ldots x_T) = \prod_{t=T}^1 p(x_t|x_{t+1}, \ldots x_T)$$
 
 In fact, if we have a Markov model we can obtain a reverse conditional probability distribution, too. In many cases, however, there exists a natural direction for the data, namely going forward in time. It is clear that future events cannot influence the past. Hence, if we change $x_t$, we may be able to influence what happens for $x_{t+1}$ going forward but not the converse. That is, if we change $x_t$, the distribution over past events will not change. Consequently, it ought to be easier to explain $x_{t+1}|x_t$ rather than $x_t|x_{t+1}$. For instance, \citet{Hoyer2008} show that in some cases we can find $x_{t+1} = f(x_t) + \epsilon$ for some additive noise, whereas the converse is not true. This is great news, since it is typically the forward direction that we’re interested in estimating. For more on this topic see for example the book \textit{Elements of Causal Inference}, by \citet{Peters2015}; we are barely scratching the surface of it.
 
-\subsection{Language models}
+\subsection{Language models}\label{subsec:lang_models}
 
 Text is an important example of sequence data. In fact, we will use natural language models as the basis for many of the examples in this chapter. Given that, it’s worth while discussing some things in a bit more detail. In the following we will view words (or sequences of characters) as a time series of discrete observations. Assuming the words in a text of length $T$ are in turn $w_1, w_2, \ldots, w_T$, then, in the discrete time series, $w_t(1 \leq t \leq T)$ can be considered as the output or label of time step $t$. Given such a sequence, the goal of a language model is to estimate the probability
 
@@ -118,7 +118,7 @@ $$
 Since they involve one, two or three terms, these are typically referred to as \textit{unigram}, \textit{bigram} and \textit{trigram} models. 
 % In the following we will learn how to design better models.
 
-\subsection{Recurrent Neural Networks}
+\subsection{Recurrent Neural Networks}\label{subsec:rnn}
 
 In the previous section we introduced $n$-gram models, where the conditional probability of word $w_t$ at position $t$ only depends on the $n-1$ previous words. If we want to check the possible effect of words earlier than $t-(n-1)$ on $w_t$, we need to increase $n$. However, the number of model parameters would also increase exponentially with it, as we need to store $|V|^n$ numbers for a vocabulary $V$. Hence, rather than modeling $p(w_t|w_{t-1}, \ldots w_{t-n+1})$ it is preferable to use a latent variable model in which we have
 
@@ -149,7 +149,7 @@ $$\mathbf{O} = \mathbf{H} \mathbf{W}_{hq} + \mathbf{b}_q.$$
 
 Here, $\mathbf{O} \in \mathbb{R}^{n \times q}$ is the output variable, $\mathbf{W}_{hq} \in \mathbb{R}^{h \times q}$ is the weight parameter, and $\mathbf{b}_q \in \mathbb{R}^{1 \times q}$ is the bias parameter of the output layer.  If it is a classification problem, we can use $\text{softmax}(\mathbf{O})$ to compute the probability distribution of the output category. This is entirely analogous to the regression problem we solved previously in \cref{subsec:sequence_models}, hence we omit details. Suffice it to say that we can pick $(w_t, w_{t-1})$ pairs at random and estimate the parameters $\mathbf{W}$ and $\mathbf{b}$ of our network via autograd and stochastic gradient descent.
 
-\subsubsection{Recurrent Networks with Hidden States}
+\subsubsection{Recurrent Networks with Hidden States}\label{subsubsec:rnn_with_hidden_state}
 
 Matters are entirely different when we have hidden states. Let's look at the structure in some more detail. Assume that $\mathbf{X}_t \in \mathbb{R}^{n \times d}$ is the mini-batch input and $\mathbf{H}_t  \in \mathbb{R}^{n \times h}$ is the hidden variable of time step $t$ from the sequence.  Unlike the multilayer perceptron, here we save the hidden variable $\mathbf{H}_{t-1}$ from the previous time step and introduce a new weight parameter $\mathbf{W}_{hh} \in \mathbb{R}^{h \times h}$, to describe how to use the hidden variable of the previous time step in the current time step. Specifically, the calculation of the hidden variable of the current time step is determined by the input of the current time step together with the hidden variable of the previous time step:
 
@@ -176,7 +176,7 @@ As discussed, the computation in the hidden state uses $\mathbf{H}_t = \mathbf{X
 
 The recurrent network defined above takes observations $X$ and a hidden state $H$ as arguments and uses them to update the hidden state and emit an output $O$. Since this chain could go on for a very long time, training the model with backprop is out of the question (at least without some approximation). After all, this leads to a very long chain of dependencies that would be prohibitive to solve exactly: books typically have more than 100,000 characters and it is unreasonable to assume that the later text relies indiscriminately on all occurrences that happened, say, 10,000 characters in the past. Truncation methods such as BPTT and long short term memory, described later, are useful to address this in a more principled manner. 
 
-\subsubsection{Steps in a Language Model}
+\subsubsection{Recurrent networks for language modelling}\label{subsubsec:rnn_lang_modelling}
 
 We conclude this section by illustrating how RNNs can be used to build a language model. For simplicity of illustration we use words rather than characters, since the former are easier to comprehend. Let the number of mini-batch examples be 1, and the sequence of the text be the beginning of our dataset, i.e. “The time Machine by H. G. Wells”. \cref{fig:rnn-train} illustrates how to estimate the next character based on the present and previous characters. During the training process, we run a softmax operation on the output from the output layer for each time step, and then use the cross-entropy loss function to compute the error between the result and the label. Due to the recurrent computation of the hidden state in the hidden layer, the output of time step 3, $\mathbf{O}_3$ is determined by the text sequence “the”, “time”, “machine”. Since the next word of the sequence in the training data is “by”, the loss of time step 3 will depend on the probability distribution of the next word generated based on the sequence “the”, “time”, “machine” and the label “by” of this time step.
 

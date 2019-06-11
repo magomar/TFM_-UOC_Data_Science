@@ -315,7 +315,7 @@ Note that the height and width of the representation at each layer throughout th
     \item LeNet was the first successful deployment of such a network.
 \end{itemize}
 
-\subsubsection{Modern convolutional architectures}
+\subsubsection{Modern convolutional architectures}\label{subsubsec:modern_cnn}
 
 Although convolutional neural networks were well known in the computer vision and machine learning communities following the introduction of LeNet, they did not immediately dominate the field. Although LeNet achieved good results on early small data sets, the performance and feasibility of training convolutional networks on larger, more realistic datasets had yet to be established
 In fact, for much of the intervening time between the early 1990s and the watershed results of 2012, neural networks were often surpassed by other machine learning methods, such as support vector machines.
@@ -360,7 +360,7 @@ This makes the model more robust and the larger sample size effectively reduces 
     \item Dropout, ReLU and preprocessing were the other key steps in achieving excellent performance in computer vision tasks.
 \end{itemize}
 
-\subsubsubsection{VGG: network architecture based on repeating blocks}
+\subsubsubsection{VGG: network architecture based on repeating blocks}\label{cnn:vgg}
 
 While AlexNet proved that deep convolutional neural networks can achieve good results, it didn't offer a general template to guide subsequent researchers in designing new networks.  In the following sections, we will introduce several heuristic concepts commonly used to design deep networks.
 
@@ -427,7 +427,7 @@ Once significant difference between NiN and AlexNet is that NiN avoids dense con
     \item The NiN design influenced many subsequent convolutional neural networks designs.
 \end{itemize}
 
-\subsubsubsection{GoogleLeNet (aka Inception): networks with parallel concatenations}
+\subsubsubsection{GoogLeNet (aka Inception): networks with parallel concatenations}\label{cnn:googlenet}
 
 In 2014, \citet{Szegedy2015} won the ImageNet Challenge, proposing a structure that combined the strengths of the NiN and repeated blocks paradigms. One focus of the paper was to address the question of which sized convolutional kernels are best. After all, previous popular networks employed choices as small as $1 \times 1$ and as large as $11 \times 11$. One insight in this paper was that sometimes it can be advantageous to employ a combination of variously-sized kernels. In this section, we will introduce GoogLeNet, presenting a slightly simplified version of the original model --we omit a few ad hoc features that were added to stabilize training
 but are unnecessary now with better training algorithms available. 
@@ -490,7 +490,7 @@ It is only reasonable to assume that if we design a different and more powerful 
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg[scale=0.8]{images/ch3/functionclasses.svg}
+	\includesvg[scale=0.5]{images/ch3/functionclasses.svg}
 	\caption{Left: non-nested function classes. The distance may in fact increase as the complexity increases. Right: with nested function classes this does not happen.}
 	\label{fig:functionclasses}
 \end{figure}

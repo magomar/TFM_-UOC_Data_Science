@@ -13,8 +13,8 @@
 \usepackage[capitalise]{cleveref}
 \usepackage{fancyhdr}
 \usepackage{epsfig, amsmath}
-\usepackage{algorithm}
-\usepackage{algorithmic}
+% \usepackage{algorithm}
+\usepackage{algorithm2e}
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{array}
@@ -22,14 +22,18 @@
 \usepackage{svg}
 \usepackage[T1]{fontenc}
 \usepackage{titlesec}
+\usepackage{listings}
 \graphicspath{ {images/} }
 
 % general settings
+
+% \newcommand{\code}{\texttt} % using \lstinline from listings package instead
 
 % cleverref settings
 \crefformat{section}{\S#2#1#3} 
 \crefformat{subsection}{\S#2#1#3}
 \crefformat{subsubsection}{\S#2#1#3}
+\crefformat{subsubsubsection}{\S#2#1#3}
 
 \hypersetup{
 	linktocpage=true,
@@ -54,43 +58,43 @@
 \setcounter{tocdepth}{2}
 
 % settings for code
-\renewcommand{\algorithmicrequire}{\textbf{Input: }}
-\renewcommand{\algorithmicensure}{\textbf{Output: }}
+% \renewcommand{\algorithmicrequire}{\textbf{Input: }}
+% \renewcommand{\algorithmicensure}{\textbf{Output: }}
 
 % settings for array stretching in tables
 % \renewcommand\arraystretch{1.25}
 
-% adding more subsectioning options
-\titleclass{\subsubsubsection}{straight}[\subsection]
+% setting for additional subsectioning options
+% \titleclass{\subsubsubsection}{straight}[\subsection]
 
-\newcounter{subsubsubsection}[subsubsection]
-\renewcommand\thesubsubsubsection{\thesubsubsection.\arabic{subsubsubsection}}
-\renewcommand\theparagraph{\thesubsubsubsection.\arabic{paragraph}} % optional; useful if paragraphs are to be numbered
+% \newcounter{subsubsubsection}[subsubsection]
+% \renewcommand\thesubsubsubsection{\thesubsubsection.\arabic{subsubsubsection}}
+% \renewcommand\theparagraph{\thesubsubsubsection.\arabic{paragraph}} % optional; useful if paragraphs are to be numbered
 
-\titleformat{\subsubsubsection}
-  {\normalfont\normalsize\bfseries}{\thesubsubsubsection}{1em}{}
-\titlespacing*{\subsubsubsection}
-{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+% \titleformat{\subsubsubsection}
+%   {\normalfont\normalsize\bfseries}{\thesubsubsubsection}{1em}{}
+% \titlespacing*{\subsubsubsection}
+% {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
-\makeatletter
-\renewcommand\paragraph{\@startsection{paragraph}{5}{\z@}%
-  {3.25ex \@plus1ex \@minus.2ex}%
-  {-1em}%
-  {\normalfont\normalsize\bfseries}}
-\renewcommand\subparagraph{\@startsection{subparagraph}{6}{\parindent}%
-  {3.25ex \@plus1ex \@minus .2ex}%
-  {-1em}%
-  {\normalfont\normalsize\bfseries}}
-\def\toclevel@subsubsubsection{4}
-\def\toclevel@paragraph{5}
-\def\toclevel@paragraph{6}
-\def\l@subsubsubsection{\@dottedtocline{4}{7em}{4em}}
-\def\l@paragraph{\@dottedtocline{5}{10em}{5em}}
-\def\l@subparagraph{\@dottedtocline{6}{14em}{6em}}
-\makeatother
+% \makeatletter
+% \renewcommand\paragraph{\@startsection{paragraph}{5}{\z@}%
+%   {3.25ex \@plus1ex \@minus.2ex}%
+%   {-1em}%
+%   {\normalfont\normalsize\bfseries}}
+% \renewcommand\subparagraph{\@startsection{subparagraph}{6}{\parindent}%
+%   {3.25ex \@plus1ex \@minus .2ex}%
+%   {-1em}%
+%   {\normalfont\normalsize\bfseries}}
+% \def\toclevel@subsubsubsection{4}
+% \def\toclevel@paragraph{5}
+% \def\toclevel@paragraph{6}
+% \def\l@subsubsubsection{\@dottedtocline{4}{7em}{4em}}
+% \def\l@paragraph{\@dottedtocline{5}{10em}{5em}}
+% \def\l@subparagraph{\@dottedtocline{6}{14em}{6em}}
+% \makeatother
 
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{4}
+% \setcounter{secnumdepth}{4}
+% \setcounter{tocdepth}{4}
 
 %%%%%%%%%%%%
 % DOCUMENT %
@@ -143,9 +147,10 @@
 % capitulos del documento
 \input{1_introduction.tex}
 \input{2_state_of_the_art.tex}
-\input{3_theory_cnn.tex}
-\input{3_theory_rnn.tex}
-\input{3_theory_enco-deco.tex}
+% \input{3_theory_cnn.tex}
+% \input{3_theory_rnn.tex}
+% \input{3_theory_enco-deco.tex}
+\input{3_scope.tex}
 \input{4_model.tex}
 \input{5_experiments.tex}
 \input{6_conclusions.tex}

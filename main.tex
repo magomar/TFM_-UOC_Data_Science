@@ -6,7 +6,7 @@
 \usepackage{natbib}
 \usepackage{color}
 \usepackage{multirow}
-\usepackage{subfigure}
+% \usepackage{subfigure}
 \usepackage{acronym}
 \usepackage{hyperref}
 \usepackage{amsmath,amsmath,amssymb} 
@@ -21,8 +21,9 @@
 \usepackage[width=.9\textwidth]{caption}
 \usepackage{svg}
 \usepackage[T1]{fontenc}
-\usepackage{titlesec}
+% \usepackage{titlesec}
 \usepackage{listings}
+\usepackage{subcaption} 
 \graphicspath{ {images/} }
 
 % general settings
@@ -64,7 +65,7 @@
 % settings for array stretching in tables
 % \renewcommand\arraystretch{1.25}
 
-% setting for additional subsectioning options
+% setting for additional subsectioning options (titlesec package)
 % \titleclass{\subsubsubsection}{straight}[\subsection]
 
 % \newcounter{subsubsubsection}[subsubsection]
@@ -147,13 +148,11 @@
 % capitulos del documento
 \input{1_introduction.tex}
 \input{2_state_of_the_art.tex}
-% \input{3_theory_cnn.tex}
-% \input{3_theory_rnn.tex}
-% \input{3_theory_enco-deco.tex}
 \input{3_scope.tex}
 \input{4_model.tex}
 \input{5_experiments.tex}
 \input{6_conclusions.tex}
+% \input{appendix_A.tex}
 
 % bibliografia
 \addcontentsline{toc}{chapter}{Bibliography}

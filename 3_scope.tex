@@ -1,5 +1,5 @@
 \chapter{Scope}
-\label{ch:design}
+\label{ch:scope}
 
 This chapter constitutes a preparatory step before describing the model in the next chapter. On the one hand, this chapter lays out the scope of the project and justifies the main design decisions taken for developing a system. In the other hand, it presents the architectural framework adopted in our system and provides some  theoretical background.
 
@@ -84,9 +84,6 @@ However, there are so many options to choose from for the different components o
 
 Finally, if there is enough time we may try different hyper-parameters, such as the number of hidden units or units in the embedding layer. Other options to play with are the size of the vocabulary, but that is difficult to estimate at this stage of the project.
 
-
-\section{Introduction to the encoder-decoder framework}
-
 \section{The Encoder-Decoder architecture}\label{sec:encoder-decoder}
 
 \subsection{From feature engineering to feature learning}
@@ -154,12 +151,21 @@ For the decoder, most systems proposed so far use LSTM units, since they are mor
 
 \subsection{Sequence to Sequence  modelling}\label{subsec:seq2seq}
 
-Next, we delv into the case where both the encoder and decoder are recurrent networks and is commonly known as sequence to sequence modelling.
+Next, we delve into the case where both the encoder and decoder are recurrent networks and is commonly known as sequence to sequence modelling.
 
 \paragraph{Seq2seq architecture}
-Sequence to sequence modelling, \textit{seq2seq} for short, is based on the encoder-decoder architecture to generate a sequence output for a sequence input. Both the encoder and the decoder use recurrent neural networks to handle sequence inputs. The hidden state of the encoder is used directly to initialize the decoder hidden state to pass information from the encoder to the decoder.
+Sequence to sequence modelling, \textit{seq2seq} for short, is based on the encoder-decoder architecture to generate a sequence output for a sequence input. This model was born in the field of language modeling \citep{Sutskever2014}. Broadly speaking, it aims to transform an input sequence (source) to a new one (target) and both sequences can be of arbitrary lengths. Examples of transformation tasks include machine translation between multiple languages in either text or audio, question-answer dialog generation, or even parsing sentences into grammar trees.
 
-We have already shown an example of seq2seq application in \cref{fig:rnn-rnn}. \cref{fig:seq2seq} illustrates the seq2seq architecture applied to translation.
+The seq2seq model normally has an encoder-decoder architecture, composed of:
+\begin{itemize}
+    \item An encoder processes the input sequence and compresses the information into a context vector (also known as sentence embedding or “thought” vector) of a fixed length. This representation is expected to be a good summary of the meaning of the whole source sequence.
+    \item A decoder is initialized with the context vector to emit the transformed output. The early work only used the last state of the encoder network as the decoder initial state.
+\end{itemize}    
+
+Both the encoder and decoder are recurrent neural networks, i.e. using LSTM or GRU units
+
+
+\cref{fig:rnn-rnn} shows and example of a query answering application that uses the seq2seq model. \cref{fig:seq2seq} shows another example of seq2seq modelling applied to translation.
 
 \begin{figure}[hpt]
 	\centering
@@ -208,7 +214,7 @@ In general, prediction is done by feeding the same "<bos>" token to the decoder 
 
 Various approaches exist to predict the next token. For example, in greedy search, the token with the highest score at each time step is chosen and used to predict the next token. More details on this will be provided in the next chapter when describing our own model details.
 
-\subsection{Attention mechanisms}\label{sec:attention}
+\subsection{Attention mechanisms}
 
 A recent trend in Deep Learning is the use of attention mechanisms, typically added to the decoder in an encoder-decoder architecture. 
 
@@ -216,96 +222,243 @@ Attention is, to some extent, motivated by how we pay visual attention to differ
 
 Attention in Neural Networks has a long history, particularly in image recognition, but only recently have attention mechanisms made their way into recurrent neural networks architectures that are typically used in NLP, and increasingly also in computer vision tasks.
 
-In a nutshell, attention in deep learning can be broadly interpreted as a vector of importance weights: in order to predict or infer one element, such as a pixel in an image or a word in a sentence, we estimate using the attention vector how strongly it is correlated with (or “attends to” as you may have read in many papers) other elements and take the sum of their values weighted by the attention vector as the approximation of the target.
+\subsubsection{Attention in Neural Machine Translation}
 
-Below we describe attention in general, and in the context of \textit{seq2seq} modelling in particular.
+In the original seq2seq model (\cref{subsec:seq2seq}), the source sequence is encoded into a fixed length context vector that is then passed to the decoder to generate a target sequence. A critical and apparent disadvantage of the fixed-length context vector design of the initial seq2seq model lies in its incapability of remembering long sentences. Often it has forgotten the first part once it completes processing the whole input. The attention mechanism was proposed by \citet{Bahdanau2015} to resolve this weakness. 
 
-\subsection{Attention Mechanism}\label{sec:attention}
+Besides, often, a token in the target sequence may closely relate to some tokens in the source sequence instead of the whole source sequence. For example, when translating "Hello world." to "Bonjour le monde.", "Bonjour" maps to "Hello" and "monde" maps to "world".  In the seq2seq model, the decoder may implicitly select the corresponding information from the state passed by the decoder. The attention mechanism, however, makes this selection explicit.
 
-In \cref{subsec:seq2seq}, we encode the source sequence input information in the recurrent unit state, and then pass it to the decoder to generate the target sequence. A token in the target sequence may closely relate to some tokens in the source sequence instead of the whole source sequence. For example, when translating "Hello world." to "Bonjour le monde.", "Bonjour" maps to "Hello" and "monde" maps to "world". In the seq2seq model, the decoder may implicitly select the corresponding information from the state passed by the decoder. The attention mechanism, however, makes this selection explicit.
+Below we describe the attention mechanism as originally proposed by \citeauthor{Bahdanau2015}, and the we will present a more general model of attention which can be applied to multimodal information tasks such as image captioning, which combines both visual and textual information.
 
-Formally, attention is a generalized pooling method with bias alignment over inputs. The core component in the attention mechanism is the \textbf{attention layer}. An input of the attention layer is called a \textbf{query}. For a query, the attention layer returns the output based on its \textbf{memory}, which is a set of key-value pairs. To be more specific, assume a query $\mathbf{q}\in\mathbb R^{d_q}$, and the memory contains $n$ key-value pairs, $(\mathbf{k}_1, \mathbf{v}_1), \ldots, (\mathbf{k}_n, \mathbf{v}_n)$, with $\mathbf{k}_i\in\mathbb R^{d_k}$, $\mathbf{v}_i\in\mathbb R^{d_v}$. The attention layer then returns an output $\mathbf o\in\mathbb R^{d_v}$ with the same shape, such that each key has a value.
+The attention mechanism was born to help memorize long source sentences in neural machine translation (NMT). Rather than building a single context vector out of the encoder’s last hidden state, the secret sauce invented by attention is to create shortcuts between the context vector and the entire source input. The weights of these shortcut connections are customizable for each output element.
+
+While the context vector has access to the entire input sequence, we don’t need to worry about forgetting. The alignment between the source and target is learned and controlled by the context vector. Essentially the context vector consumes three pieces of information: encoder hidden states, decoder hidden states, and alignment between source and target.
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/attention.svg}
-	\caption{The attention layer returns an output based on the input query and its memory.}
-	\label{fig:attention}
+	\includegraphics[scale=0.35]{images/ch3/bahdanau-attention.png}
+	\caption{The encoder-decoder model with additive attention mechanism in \citep{Bahdanau2015}}
+	\label{fig:bahdanau-attention}
 \end{figure}
 
-To compute the output, we first assume there is a score function $\alpha$ which measures the similarity --\textit{alignment}-- between the query and a key. Then we compute all $n$ scores $a_1, \ldots, a_n$ by
+More formally: say, we have a source sequence $\mathbf{x}$ of length $n$ and try to output a target sequence $\mathbf{y}$ of length $m$:
+$$
+\begin{aligned}
+\mathbf{x} &= [x_1, x_2, \dots, x_n] \\
+\mathbf{y} &= [y_1, y_2, \dots, y_m]
+\end{aligned}
+$$
+(Variables in bold indicate that they are vectors; same for everything else in this post.)
 
-$$a_i = \alpha(\mathbf q, \mathbf k_i).$$
+The encoder is a bidirectional RNN (or other recurrent network setting of your choice) with a forward hidden state $\overrightarrow{\boldsymbol{h}}_i$ and a backward one $\overleftarrow{\boldsymbol{h}}_i$. A simple concatenation of two represents the encoder state. The motivation is to include both the preceding and following words in the annotation of one word.
 
-Next we use \textit{softmax} to obtain the attention weights
+$$
+\boldsymbol{h}_i = [\overrightarrow{\boldsymbol{h}}_i^\top; \overleftarrow{\boldsymbol{h}}_i^\top]^\top, i=1,\dots,n
+$$
 
-$$b_1, \ldots, b_n = \textrm{softmax}(a_1, \ldots, a_n).$$
+The decoder network has hidden state $\boldsymbol{s}_t=f(\boldsymbol{s}_{t-1}, y_{t-1}, \mathbf{c}_t)$ for the output word at position $t, t=1,\dots,m$, where the context vector $\mathbf{c}_t$ is a sum of hidden states of the input sequence, weighted by alignment scores:
+$$
+\begin{aligned}
+\mathbf{c}_t &= \sum_{i=1}^n \alpha_{t,i} \boldsymbol{h}_i & \small{\text{; Context vector for output }y_t}\\
+\alpha_{t,i} &= \text{align}(y_t, x_i) & \small{\text{; How well two words }y_t\text{ and }x_i\text{ are aligned.}}\\
+&= \frac{\exp(\text{score}(\boldsymbol{s}_{t-1}, \boldsymbol{h}_i))}{\sum_{i'=1}^n \exp(\text{score}(\boldsymbol{s}_{t-1}, \boldsymbol{h}_{i'}))} & \small{\text{; Softmax of some predefined alignment score.}}.
+\end{aligned}
+$$
 
-The output is then a weight sum of the values
+The alignment model assigns a score $\alpha_{t,i}$ to the pair of input at position i and output at position $t, (y_t, x_i)$, based on how well they match. The set of $\{\alpha_{t, i}\}$ are weights defining how much of each source hidden state should be considered for each output. In \citep{Bahdanau2015}, the alignment score $\alpha$ is parameterized by a feed-forward network with a single hidden layer and this network is jointly trained with other parts of the model. The score function is therefore in the following form, given that \textit{tanh} is used as the non-linear activation function:
 
-$$\mathbf o = \sum_{i=1}^n b_i \mathbf v_i.$$
+$$\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \mathbf{v}_a^\top \tanh(\mathbf{W}_a[\boldsymbol{s}_t; \boldsymbol{h}_i])$$
 
-Different choices of the score function lead to different attention layers. We will discuss two commonly used attention layers in the rest of this section. In the seq2seq model the query corresponds to the decoder's hidden state, while the keys are the encoder's hidden state.
+where both $\mathbf{v}_a$ and $\mathbf{W}_a$ are weight matrices to be learned in the alignment model.
 
-\subsubsection{Dot Product Attention}
-
-The dot product assume the query has the same dimension than the keys, namely $\mathbf q, \mathbf k_i \in\mathbb R^d$ for all $i$. It computes the score by an inner product between the query and a key, and often then divided by $\sqrt{d}$ to make the scores less sensitive to the dimension $d$. In other words,
-
-$$\alpha(\mathbf q, \mathbf k) = \langle \mathbf q, \mathbf k \rangle /\sqrt{d}.$$
-
-Assume $\mathbf Q\in\mathbb R^{m\times d}$ contains $m$ queries and $\mathbf K\in\mathbb R^{n\times d}$ has all $n$ keys. We can compute all $mn$ scores by
-
-$$\alpha(\mathbf Q, \mathbf K) = \mathbf Q \mathbf K^T /\sqrt{d}.$$
-
-This attention mechanism could also include a dropout regularization mechanism (to randomly drop some attention weights).
-
-\subsubsection{Multilayer Perception Attention (additive attention)}
-
-Multilayer perception attention, also named as \textit{additive} or \textit{concat} by other authors, was proposed by \citet{Bahdanau2015} for seq2seq modelling. In this form of attention, we first project both query and keys into a common feature space $h$.
-
-To be more specific, assume learnable parameters $\mathbf W_k\in\mathbb R^{h\times d_k}$, $\mathbf W_q\in\mathbb R^{h\times d_q}$, and $\mathbf v\in\mathbb R^{p}$, then the score function is defined by
-
-$$\alpha(\mathbf k, \mathbf q) = \mathbf v^T \text{tanh}(\mathbf W_k \mathbf k + \mathbf W_q\mathbf q). $$
-
-It equals to concatenate the key and value in the feature dimension, and then feed them into a single hidden-layer perception with hidden size $h$ and output size $1$. The hidden layer activation function is \textit{tanh}, and no bias is applied.
-
-\subsubsection{Sequence to Sequence with Attention Mechanism}
-
-In this section, we add the attention mechanism to the sequence to sequence model introduced in \cref{subsec:seq2seq} to explicitly select state. The following figure shows the model architecture for a decoding time step. As can be seen, the memory of the attention layer consists of the encoder outputs of each time step. During decoding, the decoder output from the previous time step is used as the query, the attention output is then fed into the decoder with the input to provide attentional context information.
+The matrix of alignment scores is a nice byproduct to explicitly show the correlation between source and target words.
 
 \begin{figure}[hpt]
 	\centering
-	\includesvg{images/ch3/seq2seq_attention.svg}
-	\caption{The second time step in decoding for the sequence to sequence model with attention mechanism.}
-	\label{fig:seq2seq_attention}
-\end{figure}
-
-The layer structure in the encoder and the decoder is shown in the following figure.
-
-\begin{figure}[hpt]
-	\centering
-	\includesvg{images/ch3/seq2seq-attention-details.svg}
-	\caption{Layers in seq2seq model with attention.}
-	\label{fig:seq2seq-attention-details}
-\end{figure}
-
-For the decoder of this model, we add a MLP attention layer which has the same hidden size as the LSTM layer. The state passed from the encoder to the decoder contains three items:
-
-\begin{itemize}
-    \item the encoder outputs of all time steps, which are used as the attention layer's memory with identical keys and values
-    \item the hidden state of the last time step that is used to initialize the encoder's hidden state  
-    \item valid lengths of the decoder inputs so the attention layer will not consider encoder outputs for padding tokens.
-\end{itemize}
-
-In each time step of decoding, we use the output of the last RNN layer as the query for the attention layer. Its output is then concatenated with the input embedding vector to feed into the RNN layer. Despite the RNN layer's hidden state also contains history information from decoder, the attention output explicitly selects the encoder outputs that are correlated to the query and suspends other non-correlated information.
-
-The training loss is similar to the seq2seq model, because the sequences in the training dataset are relatively short. The additional attention layer doesn’t lead to a significant difference. But due to both attention layer computational overhead and we unroll the time steps in the decoder, this model is much slower than the seq2seq model without attention.
-
-\cref{fig:alignment-matrix} shows the alignment matrix that results of applying an additive attention (themechanism to a machine translation task
-
-\begin{figure}[hpt]
-	\centering
-	\includegraphics[scale=0.45]{images/ch3/alignment-matrix.png}
+	\includegraphics[scale=0.3]{images/ch3/alignment-matrix.png}
 	\caption{Alignment matrix of an French sentence and its English translation. Source: Fig 3 in \citep{Bahdanau2015})}
 	\label{fig:alignment-matrix}
 \end{figure}
+
+\subsubsection{Different attention mechanisms}
+
+With the help of the attention, the dependencies between source and target sequences are not restricted by the in-between distance anymore. Given the big improvement by attention in machine translation, it soon got extended into the computer vision field \citep{Xu2015} and people started exploring various other forms of attention mechanisms \citep{Luong2015, Britz2017, Vaswani2017}.
+
+\cref{tab:attention-mechanisms} enumerates popular attention mechanisms and their corresponding alignment score functions, where $\mathbf{W}_a$ is a trainable weight matrix in the attention layer. 
+
+\begin{table}[hpt]
+\caption{summary table of several popular attention mechanisms and corresponding alignment score functions}
+\label{tab:attention-mechanisms}
+\begin{tabular}{cll}
+Name & Alignment score function & Citation \\
+\hline
+Content-based att. & $\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \text{cosine}[\boldsymbol{s}_t, \boldsymbol{h}_i]$ & \citep{Graves2014} \\
+Additive & $\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \mathbf{v}_a^\top \tanh(\mathbf{W}_a[\boldsymbol{s}_t; \boldsymbol{h}_i])$ & \citep{Bahdanau2015} \\
+Location-Base & $\alpha_{t,i} = \text{softmax}(\mathbf{W}_a \boldsymbol{s}_t)$ & \citep{Luong2015} \\
+General & $\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \boldsymbol{s}_t^\top\mathbf{W}_a\boldsymbol{h}_i$ & \citep{Luong2015} \\
+Dot-Product & $\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \boldsymbol{s}_t^\top\boldsymbol{h}_i$ & \citep{Luong2015} \\
+Scaled Dot-Product & $\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \frac{\boldsymbol{s}_t^\top\boldsymbol{h}_i}{\sqrt{n}}$  & \citep{Vaswani2017}
+\end{tabular}
+\end{table}
+
+\paragraph{Notes} \textit{Additive} attention is also referred to as \textit{additive} or \textit{concat} by other authors. \textit{Location-based} attention simplifies the softmax alignment to only depend on the target position. The \textit{scaled dot attention} is very similar to the dot-product attention except for the scaling factor $1/\sqrt{n}$; where $n$ is the dimension of the source hidden state.
+
+Besides the scoring functions, there are different ways to classify attention mechanisms, for example:
+
+\begin{itemize}
+    \item Self-Attention \citep{Cheng2016}: Relating different positions of the same input sequence. Theoretically the self-attention can adopt any score functions above, but just replace the target sequence with the same input sequence. 
+    \item Global/Soft \cite{Xu2015}: Attending to the entire input state space. 
+    \item Local/Hard \citep{Xu2015, Luong2015}: Attending to the part of input state space; i.e. a patch of the input image.
+\end{itemize}
+
+\subsubsection{Self-Attention}
+
+Self-attention, also known as intra-attention, is an attention mechanism relating different positions of a single sequence in order to compute a representation of the same sequence. It has been shown to be very useful in machine reading, abstractive summarization, or image description generation.
+
+The LSTM network by \citet{Cheng2016} uses self-attention to do machine reading. \cref{fig:self-attention} illustrates this mechanism with an example. See how self-attention mechanism enables the model to learn the correlation between the current words and the previous part of the sentence.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.2]{images/ch3/self-attention.png}
+	\caption{The current word is in red and the size of the blue shade indicates the activation level. Source: \citep{Cheng2016}.}
+	\label{fig:self-attention}
+\end{figure}
+
+Self-attention can also be applied to image captioning. For example, in the "Show, attend and tell" paper by \citet{Xu2015}, an input  image is first encoded by a convolutional neural network to generate a feature map, and then a recurrent network with self-attention over the image consumes the attention-weighted feature maps to generate the descriptive words one by one. The visualization of the attention weights clearly demonstrates which regions of the image the model pays attention to so as to output a certain word.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.2]{images/ch3/visual-attention.jpg}
+	\caption{Caption generation example:A woman is throwing a frisbee in a park. Source: \citep{Xu2015}.}
+	\label{fig:visual-attention}
+\end{figure}
+
+\subsubsection{Soft vs Hard Attention}
+
+The \textit{soft} vs \textit{hard} attention is another way to categorize how attention is defined. The original idea was proposed in the "Show, attend and tell" paper \citep{Xu2015}, based on whether the attention has access to the entire image or only a patch:
+
+\begin{itemize}
+    \item Soft Attention: the alignment weights are learned and placed "softly" over all patches in the source image; which corresponds to the additive attention model by \citet{Bahdanau2015}.
+    \begin{itemize}
+        \item Pro: the model is smooth and differentiable.
+        \item Con: expensive when the source input is large.
+    \end{itemize}
+    \item Hard Attention: only selects one patch of the image to attend to at a time.
+    \begin{itemize}
+        \item Pro: less calculation at the inference time.
+        \item Con: the model is non-differentiable and requires more complicated techniques such as variance reduction or reinforcement learning to train \citep{Luong2015}. 
+    \end{itemize}
+\end{itemize}
+
+\cref{fig:soft-vs-hard-attention} illustrates the soft vs hard effect attention with a visual example from the original paper.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.3]{images/ch3/soft-vs-hard-attention.png}
+	\caption{Comparative of soft (top) vs hard (bottom) attention during caption generation. Source: \citep{Xu2015}.}
+	\label{fig:soft-vs-hard-attention}
+\end{figure}
+
+\subsubsection{Global vs Local Attention}
+
+\citet{Luong2015} coined the \textit{global} vs \textit{local} attention distinction. The global attention is similar to the soft attention, while the local one is an interesting blend between hard and soft, an improvement over the hard attention to make it differentiable: the model first predicts a single aligned position for the current target word and a window centered around the source position is then used to compute a context vector.
+
+\cref{fig:global-vs-local-attention} compares global and local models of attention in a seq2seq setup.
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.3]{images/ch3/global-vs-local-attention.png}
+	\caption{Comparative of global (left) vs local (right) attention in the seq2seq model. Source: \citep{Luong2015}.}
+	\label{fig:global-vs-local-attention}
+\end{figure}
+
+The are other models that apply similar ideas and can thus be seen as variations of the same idea. We will not describe them here, but we enumerate them together:
+
+\begin{itemize}
+    \item The \textit{Neural Turing Machine}(NTM), by \citet{Graves2014}, is a model architecture for coupling a neural network with external memory storage. The memory mimics the Turing machine tape and the neural network controls the operation heads to read from or write to the tape. However, the memory in NTM is finite, and thus it probably looks more like a "Neural von Neumann Machine".
+    \item In problems like sorting or travelling salesman, both input and output are sequential data. Unfortunately, they cannot be easily solved by classic seq2seq or NMT models, given that the discrete categories of output elements are not determined in advance, but depends on the variable input size. The \textit{Pointer Net} (Ptr-Net), was proposed by \citet{Vinyals2015} to address this problem when the output elements correspond to positions in an input sequence. Rather than using attention to blend hidden units of an encoder into a context vector (See Fig. 8), the Pointer Net applies attention over the input elements to pick one as the output at each decoder step.
+    \item The \textit{transformer} model introduced in the "Attention is all you need" paper by \citet{Vaswani2017} is entirely built on the self-attention mechanisms without using sequence-aligned recurrent architecture. It presented a lot of improvements to the soft attention mechanism, and make it possible to do seq2seq modeling without recurrent network unit, thus reducing the computational costs.
+\end{itemize}
+
+% \subsection{A general model of attention}\label{subsec:general-attention-model}
+
+% Formally, attention is a \textit{generalized pooling method with bias alignment over inputs}. The core component in the attention mechanism is the \textbf{attention layer}. An input of the attention layer is called a \textbf{query}. For a query, the attention layer returns the output based on its \textbf{memory}, which is a set of key-value pairs. To be more specific, assume a query $\mathbf{q}\in\mathbb R^{d_q}$, and the memory contains $n$ key-value pairs, $(\mathbf{k}_1, \mathbf{v}_1), \ldots, (\mathbf{k}_n, \mathbf{v}_n)$, with $\mathbf{k}_i\in\mathbb R^{d_k}$, $\mathbf{v}_i\in\mathbb R^{d_v}$. The attention layer then returns an output $\mathbf o\in\mathbb R^{d_v}$ with the same shape, such that each key has a value.
+
+% \begin{figure}[hpt]
+% 	\centering
+% 	\includesvg{images/ch3/attention.svg}
+% 	\caption{The attention layer returns an output based on the input query and its memory.}
+% 	\label{fig:attention}
+% \end{figure}
+
+% To compute the output, we first assume there is a score function $\alpha$ which measures the similarity --\textit{alignment}-- between the query and a key. Then we compute all $n$ scores $a_1, \ldots, a_n$ by
+
+% $$a_i = \alpha(\mathbf q, \mathbf k_i).$$
+
+% Next we use \textit{softmax} to obtain the attention weights
+
+% $$b_1, \ldots, b_n = \textrm{softmax}(a_1, \ldots, a_n).$$
+
+% The output is then a weight sum of the values
+
+% $$\mathbf o = \sum_{i=1}^n b_i \mathbf v_i.$$
+
+% Different choices of the score function lead to different attention layers, as the ones shown in \cref{tab:attention-mechanisms}. 
+
+% Below we see how this general model fits to some of the specific models introduced above, More specifically, we briefly describe two of the most popular attention models: the \textit{dot product} and the \textit{additive} models. 
+
+% \subsubsection{Scaled Dot Product Attention}
+
+% The dot product assume the query has the same dimension than the keys, namely $\mathbf q, \mathbf k_i \in\mathbb R^d$ for all $i$. It computes the score by an inner product between the query and a key, and often then divided by $\sqrt{d}$ to make the scores less sensitive to the dimension $d$. In other words,
+
+% $$\alpha(\mathbf q, \mathbf k) = \langle \mathbf q, \mathbf k \rangle /\sqrt{d}.$$
+
+% Assume $\mathbf Q\in\mathbb R^{m\times d}$ contains $m$ queries and $\mathbf K\in\mathbb R^{n\times d}$ has all $n$ keys. We can compute all $mn$ scores by
+
+% $$\alpha(\mathbf Q, \mathbf K) = \mathbf Q \mathbf K^T /\sqrt{d}.$$
+
+% This attention mechanism could also include a dropout regularization mechanism (to randomly drop some attention weights).
+
+% \subsubsection{Additive attention (Multilayer Perception)}
+
+% Multilayer perception attention was proposed by \citet{Bahdanau2015} for seq2seq modelling. In this form of attention, we first project both query and keys into a common feature space $h$.
+
+% To be more specific, assume learnable parameters $\mathbf W_k\in\mathbb R^{h\times d_k}$, $\mathbf W_q\in\mathbb R^{h\times d_q}$, and $\mathbf v\in\mathbb R^{p}$, then the score function is defined by
+
+% $$\alpha(\mathbf k, \mathbf q) = \mathbf v^T \text{tanh}(\mathbf W_k \mathbf k + \mathbf W_q\mathbf q). $$
+
+% It equals to concatenate the key and value in the feature dimension, and then feed them into a single hidden-layer perception with hidden size $h$ and output size $1$. The hidden layer activation function is \textit{tanh}, and no bias is applied.
+
+% \subsubsection{Sequence to Sequence with Additive Attention}
+
+% In this section, we add the attention mechanism to the sequence to sequence model introduced in \cref{subsec:seq2seq} to explicitly select state. The following figure shows the model architecture for a decoding time step. As can be seen, the memory of the attention layer consists of the encoder outputs of each time step. During decoding, the decoder output from the previous time step is used as the query, the attention output is then fed into the decoder with the input to provide attentional context information.
+
+% \begin{figure}[hpt]
+% 	\centering
+% 	\includesvg{images/ch3/seq2seq_attention.svg}
+% 	\caption{The second time step in decoding for the sequence to sequence model with attention mechanism.}
+% 	\label{fig:seq2seq_attention}
+% \end{figure}
+
+% The layer structure in the encoder and the decoder is shown in the following figure.
+
+% \begin{figure}[hpt]
+% 	\centering
+% 	\includesvg{images/ch3/seq2seq-attention-details.svg}
+% 	\caption{Layers in seq2seq model with attention.}
+% 	\label{fig:seq2seq-attention-details}
+% \end{figure}
+
+% For the decoder of this model, we add a MLP attention layer which has the same hidden size as the LSTM layer. The state passed from the encoder to the decoder contains three items:
+
+% \begin{itemize}
+%     \item the encoder outputs of all time steps, which are used as the attention layer's memory with identical keys and values
+%     \item the hidden state of the last time step that is used to initialize the encoder's hidden state  
+%     \item valid lengths of the decoder inputs so the attention layer will not consider encoder outputs for padding tokens.
+% \end{itemize}
+
+% In each time step of decoding, we use the output of the last RNN layer as the query for the attention layer. Its output is then concatenated with the input embedding vector to feed into the RNN layer. Despite the RNN layer's hidden state also contains history information from decoder, the attention output explicitly selects the encoder outputs that are correlated to the query and suspends other non-correlated information.
+
+% The training loss is similar to the seq2seq model, because the sequences in the training dataset are relatively short. The additional attention layer doesn’t lead to a significant difference. But due to both attention layer computational overhead and we unroll the time steps in the decoder, this model is much slower than the seq2seq model without attention.
+
+

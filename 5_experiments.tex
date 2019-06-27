@@ -12,7 +12,6 @@ We were considering four datasets to conduct our experiments. We also considered
 	\label{fig:caption-example}
 \end{figure}
 
-
 In the end we only used this dataset because the other common options are clearly outdated, such as the Flickr8K and Flickr30K. Although the latter was deemed as an interesting option for faster experiments in the first stages of the project, we finally upgraded the hardware with a very powerfull GPU that made it feasible to use the COCO dataset as the only experimental dataset, and still conduct a considerable number of experiments.
 
 As a matter of fact, there is still a larger dataset supporting image captioning, the Conceptual Captions dataset, by Google  \citep{Sharma2018}, which also offers an online evaluation server and a \href{https://ai.google.com/research/ConceptualCaptions/leaderboard?active_tab=leaderboard}{public leaderboard}. However, it was released just a few months ago, and it is so huge, that it will probably take sometime before it is widely adopted by researchers\footnote{When I started this project there was no results yet but the ones published by google. A month later there are already four additional results from two different teams}.
@@ -31,71 +30,250 @@ All in all, after filtering the dataset on a maximum caption length basis, we en
 
 Concerning the vocabulary, the resulting corpus contains 24,775 words, which is still a huge number, considering than many words only appears once. Finally, we decided to set the vocabulary size to 10,000. The words excluded from the vocabulary were assigned the "<unk>" token. The size of the vocabulary is another hyperparameter of the model (\lstinline{config.vocabulary_size}).
 
-
-
 \subsubsection{Validation dataset}
 
-The full validation dataset contains 40504 images and  ???? captions. 
-After applying the same filtering schema based on the maximum length of the captions, the dataset was reduced to 34043 images
+The full validation dataset contains 40504 images and 5 captions per image. After applying the same filtering schema based on the maximum length of the captions, the dataset was reduced to 34043 images
 
 Note that for the training process, each instance is made up of one single caption and its associated image, whilst for the evaluation process, each instance is an image and all its associated captions. 
 
 \section{Experiments}
 
-For the experiments we trained various models changing some hyperparameters:
+\subsection{Experimental setup}
+
+All the experiments reported in this chapter were performed on the MSCOCO dataset, with the additional constrains described above, which resulted in two separated datasets, one for the training, and another one for validations. Summing up:
+
 \begin{itemize}
-    \item The CNN: 'VGG16', 'incept', 'Xception, 'ResNet50', ,'InceptionResNet\_v2'
-    \item The Type of units in RNN: 'GRU' or 'LSTM'
-    \item The Embedding dimension: 256, 512
-    \item The Number of recurrent units: 256, 512
-    \item The Number of image features: 256, 512, 1024
-    \item The Batchsize: 64, 128
+    \item \textbf{Training}: 347,228 examples, each one consisting of an image-caption pair
+    \item \textbf{Validation}: 34043 examples, each one consisting of an image, and all their captions (5 captions per image)
 \end{itemize}
 
-We trained all the models for 30 epochs. In one case we trained the model for 90 epochs, but it was clearly overfitted, as 
+Caption length is limited to 15 significant tokens, plus the "<start>" and "<end>" token.
+
+Hardware setup:
+\begin{itemize}
+    \item CPU: Intel Core i7-4790K (4 cores, 8 threads clocked @ 4 GHz)
+    \item RAM: 16GB DIMM DDR3 2400 (clocked @ 1333 MHz)
+    \item Data Storage: SSD Samsung 850 Evo 250GB
+    \item GPU-0: NVIDIA GTX 1070, 6GB RAM
+    \item GPU-1: NVIDIA RTX 2080 Ti, 11GB RAM
+\end{itemize}
+
+We will not give detailed timing results, because the computer was used interactively to perform other tasks while it was training, but we will make some comments on time aspects whenever there is something relevant to mention. For the moment, it suffice to say that in most cases, a full training epoch took between 40 and 50 minutes to complete.
+
+\subsection{Overview of the experiments}
+
+For the experiments we trained the same basic models but changing some hyperparameters:
+
+\begin{itemize}
+    \item Type of ConvNet: 'VGG16', 'incept', 'Xception, 'ResNet50', ,'InceptionResNet\_v2'
+    \item Type of recurrent units: 'GRU' or 'LSTM'
+    \item Number of recurrent units: 256, 512
+    \item Embedding dimension: 256, 512
+    \item Number of image features: 256, 512, 1024
+    \item Batch size: 64, 128
+    \item Dropout percentage: 0, 0.3, 0.5
+\end{itemize}
+
 Unfortunately, due to the long time required to train each model, we were unable to systematically try all the combinations of the chosen hyperparameters. 
 
+We trained all the models for 30 epochs. In one case we trained the model for 90 epochs, but the results clearly indicated that the model was overfitting.  Therefore, we conducted some additional experiments to analyse the problem, and finally we came up adding some Dropout layers as a form of regularization.  All this experiments will be analysed below.
 
+To have a sense of the kind of experiments performed, \cref{tab:results} provides a summary of the main block of experiments performed. In these experiments we did not apply regularization and the training lasted 30 epochs. CNN and RNN are the type of ConvNet and RecurrentNet respectively, Emb refers to the size of the embedding vectors, Feat is the number of visual features used as input, Batch refers to the batch size, Optimi to the optimizer function, B1-B4 are Ble scores, MET refers to Meteor, R refers to ROUGE, and C to CIDEr. Results in this table are sorted by CIDEr score.
 
-\begin{table}[]
-\caption{Evaluation results}
+\begin{table}[hpt]
+\caption{Evaluation results. Model trained for 30 epochs. No regularization applied.}
 \label{tab:results}
-\begin{tabular}{lllllllllllllll}
-cnn & rnn & embed & state & feat & batch & optimizer & Bleu1 & Bleu2 & Bleu3 & Bleu4 & METEOR & ROUGE & CIDEr & attention \\
-incept & lstm & 256 & 512 & 256 & 128 & Adam & 0.510 & 0.337 & 0.213 & 0.131 & 0.164 & 0.364 & 0.410 & False \\
-incept & lstm & 256 & 512 & 256 & 64 & Adam & 0.521 & 0.342 & 0.215 & 0.132 & 0.166 & 0.367 & 0.406 & False \\
-incept & lstm & 512 & 512 & 256 & 64 & Adam & 0.532 & 0.346 & 0.215 & 0.132 & 0.170 & 0.365 & 0.394 & False \\
-incept & gru & 512 & 512 & 512 & 64 & Adam & 0.509 & 0.330 & 0.205 & 0.125 & 0.162 & 0.357 & 0.390 & False \\
-incept & gru & 256 & 512 & 256 & 64 & Adam & 0.503 & 0.329 & 0.206 & 0.127 & 0.160 & 0.357 & 0.388 & False \\
-incept & gru & 256 & 512 & 256 & 64 & Nadam & 0.515 & 0.336 & 0.209 & 0.127 & 0.163 & 0.360 & 0.380 & False \\
-incept & lstm & 256 & 512 & 1024 & 128 & Adam & 0.509 & 0.327 & 0.201 & 0.121 & 0.162 & 0.355 & 0.370 & False \\
-xception & gru & 256 & 512 & 256 & 64 & Adam & 0.507 & 0.326 & 0.199 & 0.120 & 0.160 & 0.352 & 0.365 & False \\
-incept & gru & 512 & 1024 & 512 & 128 & Adam & 0.490 & 0.314 & 0.192 & 0.116 & 0.155 & 0.347 & 0.355 & False \\
-resnet50 & lstm & 256 & 512 & 512 & 128 & Adam & 0.463 & 0.302 & 0.188 & 0.115 & 0.152 & 0.342 & 0.351 & False
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llllllllllllll}
+CNN & RNN & Emb & Hid & Feat & Batch & Optim & B1 & B2 & B3 & B4 & MET & ROU & CID \\
+\hline
+incep-res & lstm & 512 & 512 & 512 & 64 & Adam & 0.485 & 0.320 & 0.203 & 0.127 & 0.162 & 0.357 & 0.413 \\
+inception & lstm & 256 & 512 & 256 & 128 & Adam & 0.510 & 0.337 & 0.213 & 0.131 & 0.164 & 0.364 & 0.410 \\
+inception & lstm & 256 & 512 & 256 & 64 & Adam & 0.521 & 0.342 & 0.215 & 0.132 & 0.166 & 0.367 & 0.406 \\
+inception & lstm & 512 & 512 & 256 & 64 & Adam & 0.532 & 0.346 & 0.215 & 0.132 & 0.170 & 0.365 & 0.394 \\
+inception & gru & 512 & 512 & 512 & 64 & Adam & 0.509 & 0.330 & 0.205 & 0.125 & 0.162 & 0.357 & 0.390 \\
+inception & gru & 256 & 512 & 256 & 64 & Adam & 0.503 & 0.329 & 0.206 & 0.127 & 0.160 & 0.357 & 0.388 \\
+inception & gru & 256 & 512 & 256 & 64 & Nadam & 0.515 & 0.336 & 0.209 & 0.127 & 0.163 & 0.360 & 0.380 \\
+inception & lstm & 256 & 512 & 1024 & 128 & Adam & 0.509 & 0.327 & 0.201 & 0.121 & 0.162 & 0.355 & 0.370 \\
+xception & gru & 256 & 512 & 256 & 64 & Adam & 0.507 & 0.326 & 0.199 & 0.120 & 0.160 & 0.352 & 0.365 \\
+inception & gru & 512 & 1024 & 512 & 128 & Adam & 0.490 & 0.314 & 0.192 & 0.116 & 0.155 & 0.347 & 0.355 \\
+resnet & lstm & 256 & 512 & 512 & 128 & Adam & 0.463 & 0.302 & 0.188 & 0.115 & 0.152 & 0.342 & 0.351
+\end{tabular}}
+\end{table}
+
+\subsubsection{Effect of hyperparameters on performance}
+
+In order to study the effect of the different hyperparameters of the model on the performance, we have grouped and average the results for different combinations of parameters. \cref{fig:scores_by_cnn} and \cref{fig:scores_by_rnn} compares the performance depending on different types of network, for the encoder and decoder respectively. The other figures compare the performance of the model depending on some numerical hyperparameters, such as the batch size, the number of hidden units, the embedding size, or the number of image features that are generated by the encoder.
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includesvg[width=\textwidth]{images/ch5/scores_by_cnn.svg}
+    \caption{Scores by type of ConvNet}
+    \label{fig:scores_by_cnn}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includesvg[width=\textwidth]{images/ch5/scores_by_rnn.svg}
+    \caption{Scores by type of RNN unit}
+    \label{fig:scores_by_rnn}
+  \end{subfigure}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includesvg[width=\textwidth]{images/ch5/scores_by_batch_size.svg}
+    \caption{Scores by batch size}
+    \label{fig:scores_by_batch_size}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includesvg[width=\textwidth]{images/ch5/scores_by_hidden.svg}
+    \caption{Scores by number of recurrent units}
+    \label{fig:scores_by_hidden_units}
+  \end{subfigure}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includesvg[width=\textwidth]{images/ch5/scores_by_embedding.svg}
+    \caption{Scores by embedding dimension}
+    \label{fig:scores_by_embedding}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includesvg[width=\textwidth]{images/ch5/scores_by_features.svg}
+    \caption{Scores by number of image features}
+    \label{fig:scores_by_features}
+  \end{subfigure}
+\end{figure}
+
+By looking at the former graphs, and at the correlation matrix in \cref{fig:correlation_matrix}, we can see the following relations between the hyperparameters and the scores measured over the validation dataset.
+\begin{itemize}
+    \item In general, there is a high degree of correlation between the different metrics except for CIDEr, that shows the less correlation with the other metrics.
+    \item In all the numerical hyperparameters we observe a moderately negative correlation with the scoring metrics. That is, the higher the value of the hyperparameter the worse scoring obtained. Why is that? In general, higher values in these parameters  (ie. more units, larger batches) make the model more complex, which in turn increases the bias. Therefore, by having set up a fixed number of training epochs, this observation is consistent with overfitting. That is, since the model is overfitting, increasing the complexity of the model can only aggravate the problem. 
+\end{itemize}
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[scale=0.7]{images/ch5/correlation_matrix.png}
+	\caption{Correlation matrix for the numeric hyperparameters and the performance metrics}
+	\label{fig:correlation_matrix}
+\end{figure}
+
+\subsubsection{Training and overfitting}
+
+Overfitting occurs when a model performs very well with the training dataset, but not so well with other data, that is, the model does not generalizes well.
+Overfitting can be discovered by comparing the performance over the training dataset and the validation dataset. Usually the same loss function is used in both cases and it is pretty easy to find out if a model is overfitting. In the image captioning problem and other problems in NLP, this is not so easy because the prediction stage is different from the training stage (recall the teacher forcing technique used to generate captions in our model). Furthermore, language tasks use sophisticated metrics to estimate the quality of the model. In these cases, overfitting can be discovered by studing the dynamics of the system. Typically, we will see a stall o even a deterioration in the performance although the training loss continues decreasing. Ideally, we would interleave training and validation to detect this kind of problems as soon as possible. By doing this we can stop the training to avoid wasting time and keep a copy of the model when it was performing the better. This technique is called \textit{early stopping}, and can be seen as specific form of regularization. 
+
+We did not include an automatic validation mechanism interleaved with the training process, however we did perform various analysis of the dynamics of the model by keeping chekpoints, that is, by saving the model at different moments along the training process, and evaluating multiple models afterwards. An example of such anlysis can be seen in \cref{fig:training_evolution}. Clearly, there is a point, around the 6th epoch, when the metric scores worsen, while the training loss is still decreasing. This behaviour is a clear example of overfitting.
+
+
+\begin{figure}[hpt]
+	\centering
+	\includesvg[scale=0.7]{images/ch5/training_evolution.svg}
+	\caption{Evolution of loss and performance as training progresses}
+	\label{fig:training_evolution}
+\end{figure}
+
+There are various approaches to avoid or diminish overfitting. Two of the most popular techniques applied in deep learning are dropout and batch normalization.
+
+\subsubsection{Dropout regularization}
+
+In the last stage of the project we did manage to include some degree of regularization by introducing dropout layers just before dense layers in the different components of the model: the encoder, the decoder, and also the attention mechanism. We did not have to time for a systematic analysis, but preliminary results showed that this solution delayed the overfitting for several epochs, although in the end there was overfitting. 
+We expect to delve deeper into this technique in the future to improve our results. Also, it would be interesting to try other mechanisms such as batch normalization.
+
+As illustration of the effect obtained by dropout, compare \cref{tab:without-dropout} and \cref{tab:with-dropout}. These tables show results of the same model for 10 epochs, showing the metric scores of the validation each 2 epochs. However,the first one does not include dropout, and second one includes a dropout of 0.3 (probability of letting a unit out during training)
+
+\begin{table}[hbt]
+\caption{Some results of training and validation without normalization}
+\label{tab:without-dropout}
+\begin{tabular}{lllllllll}
+Epochs & Loss & Bleu1 & Bleu2 & Bleu3 & Bleu4 & METEOR & ROUGE & CIDEr \\
+2 & 1.56763 & 0.448 & 0.302 & 0.191 & 0.119 & 0.152 & 0.354 & 0.362 \\
+4 & 1.439718 & 0.492 & 0.339 & 0.223 & 0.143 & 0.168 & 0.378 & 0.45 \\
+6 & 1.357404 & 0.501 & 0.345 & 0.229 & 0.149 & 0.171 & 0.381 & 0.472 \\
+8 & 1.296668 & 0.497 & 0.34 & 0.223 & 0.145 & 0.169 & 0.377 & 0.466 \\
+10 & 1.261107 & 0.498 & 0.338 & 0.22 & 0.141 & 0.168 & 0.376 & 0.461
 \end{tabular}
 \end{table}
 
+\begin{table}[hbt]
+\caption{Some results of training and validation with dropout = 0.3}
+\label{tab:with-dropout}
+\begin{tabular}{lllllllll}
+Epochs & Loss & Bleu1 & Bleu2 & Bleu3 & Bleu4 & METEOR & ROUGE & CIDEr \\
+2 & 1.562302 & 0.466 & 0.324 & 0.214 & 0.137 & 0.161 & 0.369 & 0.434 \\
+4 & 1.431397 & 0.496 & 0.346 & 0.231 & 0.15 & 0.171 & 0.381 & 0.478 \\
+6 & 1.350335 & 0.511 & 0.357 & 0.239 & 0.154 & 0.175 & 0.387 & 0.495 \\
+8 & 1.285521 & 0.522 & 0.363 & 0.24 & 0.154 & 0.177 & 0.387 & 0.494 \\
+10 & 1.237422 & 0.517 & 0.356 & 0.235 & 0.15 & 0.175 & 0.383 & 0.484 \\
+\end{tabular}
+\end{table}
 
+\subsection{Demonstrative examples}
 
-% 90 epochs overfitting !!
+We conclude this section by showing some examples of the captions generated by our model using some examples from the validation dataset. As you can see, there are different types of error, but in general it is clear that the system is at least recognizing some of the elements of the image. Besides, generated sentences tend to be grammatically, thus demonstrating that they the system has learnt a language model too.
 
-% cnn = inception_v3
-% rnn = lstm
-% embedding_dim = 512
-% rnn_units = 512
-% num_features = 512
-% weight_initialization = glorot_uniform
-% batch_size = 64
-% optimizer = Adam
+% Example 1
 
-% Final loss after 90 epochs 0.961689
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=5cm]{images/ch5/example1.png}
+	\caption{A man standing on a tennis court holding a tennis racquet.}
+	\label{fig:example1}
+\end{figure}
 
-% EPOCH 91 Loss 0.963 ... overfitting
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=10cm]{images/ch5/example1-attention.png}
+	\caption{Predicted: a tennis player is getting ready to hit a tennis ball.}
+	\label{fig:example1-att}
+\end{figure}
 
-% Bleu_1: 0.489
-% Bleu_2: 0.311
-% Bleu_3: 0.189
-% Bleu_4: 0.113
-% METEOR: 0.155
-% ROUGE_L: 0.345
-% CIDEr: 0.352
+% Example 2
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=5cm]{images/ch5/example2.png}
+	\caption{Two males and a female walking in the snow carrying a ski sled and snowboard.}
+	\label{fig:example2}
+\end{figure}
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=10cm]{images/ch5/example2-attention.png}
+	\caption{Predicted: a person riding skis ride down a snowy hills.}
+	\label{fig:example2-att}
+\end{figure}
+
+% Example 3
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=5cm]{images/ch5/example3.png}
+	\caption{A man sitting on the back of a red truck.}
+	\label{fig:example3}
+\end{figure}
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=10cm]{images/ch5/example3-attention.png}
+	\caption{Predicted: a group of people are posing for a red covered lawn.}
+	\label{fig:example3-att}
+\end{figure}
+
+% Example 4
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=5cm]{images/ch5/example1.png}
+	\caption{a man is holding a piece of food with chocolate in it.}
+	\label{fig:example4}
+\end{figure}
+
+\begin{figure}[hpt]
+	\centering
+	\includegraphics[width=10cm]{images/ch5/example4-attention.png}
+	\caption{A person holding a piece of chocolate cake with a chocolate cake.}
+	\label{fig:example4-att}
+\end{figure}

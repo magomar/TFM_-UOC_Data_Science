@@ -1,13 +1,70 @@
 \chapter{Conclusions}
+\label{ch:conclusions}
+
+This chapter presents a critical self-opinion of the project and collects a number of potentional improvements and future work.
+
+\section{What I learned}
+
+This project has supposed a huge advancement in my understanding of deep learning, specially in the fields of Natural Language Processing (NLP) and Computer Vision (CV). 
+
+To begin with, I had to review a lot of literature on the topics of the project. Furthermore, being a project that combines NLP and CV, it covered a vast number of concepts, models and technologies. The initial stages of the project, where I was supposed to collect information on the project and review the state of the art, easily exceeded the expected effort by twice or tribble at least. One paper led to another paper, one model was soon discovered to have been surpassed by other models the following year, and so on. In the end, I expend more than a month actively researching the subjects, plus some extra days collecting and summarizing benchmark results from several, some times contradictory sources.
+
+Secondly, I combined my research-oriented efforts with an intense self-learning program which basically took-me through the 5 courses of the Deep Learning specialization program by \textit{deeplearning.ai} and professor Andrew Ng. at Coursera. Those courses gave me a wide and solid knowledge of deep learning, NLP and CV, combining both theory knowledge with hands-on experience, although the pace was probably too fast as to get a deep understanding of all the content: techniques to develop and improve deep networks, ConvNets, sequence modelling and recurrent networks, etc. There were many practical exercises, which were done using Python and Tensorflow  on Juptyer Notebook. The case studies ranged from healthcare and autonomous driving to music generation, and natural language processing. All this knowledge was probably too much to digest in barely two months, but I still got a grasp of many of the concepts and techniques described in the courses, which was of great help to understand the research papers and model implementations I had to review as part of the project.
+
+Third, I had to put into practice many of the concepts and techniques learnt. These included fully connected layers, which I was already familiar with, but also ConvNets, RNNs, language modelling, seq2seq models, attention mechanisms, beamseach, and so many other, most of which were new to me. In the beginning, started implementing quick prototypes as a proof of concept, to make sure my hardware had enough computational power to handle a big dataset, as was my intention. To that avail, I started prototyping  by means of the Jupyter Notebook platform. Preliminary results made me buy a more powerful GPU, as described in \cref{sec:scope}. Soon, I jumped from the prototyping environment into a fully-fledged development environment, which  included the following tools and technologies:
+
+\begin{itemize}
+    \item Linux operating system, with CUDA drivers for GPU support
+    \textit{Visual Studio Code} editor
+    \item \textit{Git} control version and a remote \textit{GitLab} repository
+    \item \textit{Conda} and \textit{Pip} for package management
+    \item Tensorflow 2.0.0-alpha with GPU support, and Keras API.
+\end{itemize}
+
+
+\subsection{What I would have changed}
+
+The development of a working system was an intense and very exciting experience too, but the entire development effort was highly conditioned from the very beginning by an excruciating lack of time. As a matter of fact, the analysis of the problem and the review of the literature consumed too much of my time, and thereafter I felt severely pushed by this lack of time, which made me commit several mistakes. 
+
+\begin{itemize}
+    \item First and probably the most severe mistake was developing and debugging the system using a big dataset. Once I realize I needed a smaller dataset for the initial development stage, I limited the number of examples actually used from the dataset, but as soon as I obtained an apparently working system I moved into the full dataset. By doing this, I had to expend a lot of time waiting for results rather than tweaking and improving the model.
+    \item A second mistake that aggravated the former was the lack of a proper evaluation mechanism, which was delayed until the latest stages of the development process, when I included a tool to compute the usual metrics (Bleu, Meteor, etc.). Even worse, I didn't take the effort to interleave validation and training, that is, to check the generalization ability of the network as the training progressed. Too late I realized that the model was tremendously overfitting, as shown in the experimental section (\cref{ch:experiments}.
+\end{itemize}
+
+The combination of the two mistakes above made me waste a lot of time and computing resources overfitting the model far beyond the sweet spot. I couldn't imagine how soon overfitting started, but it was too late. However, this is a lesson I will never forget. 
+
+\subsection{What I did not expect}
+
+In general, the different experiments with the model performed  considerably worse than expected considering the results achieved by the model it was inspired by, the one described in the "Show, attend and tell" paper by \citet{Xu2015}. However, but I have yet to find out whether this is due to implementation details, the lack of a proper fine tuning of the parameters, or a combination of the former.
+
+The most frustrating result was due to the bad performance obtained by the beam search algorithm. It took several hours to develop a working \textit{beamsearch} algorithm. However, it was incredibly slow, and yet it obtained worse results than greedy search, which was absolutely unexpected. I should have to investigate this in the future, since I am really disappointed.
+
+After conducting a number of experiments with attention and still not getting as good results as expected, I decided to compare the model with attention against the same model without attention. For that purpose, I modified the existing model and conducted various experiments, but something was probably wrong, because I couldn't obtain any reasonable results to compare against, but I did not have more time to debug it.
 
 \section{Future work}
 
-Doing more hyper parameter tuning (learning rate, batch size, number of layers, number of units, dropout rate, batch normalization etc.).
+The limited time prevented me from adopting a more systematic and thorough approach to the development of a solution. In this final section I will enumerate some of the many things that could be done to complete, improve or extend the developed system, as well as alternative approaches to the image captioning problems, which include published work as well as some ideas that come to my mind based on what I have learnt during this project.
 
-Use the cross validation set to understand overfitting.
+First of all, some validation should be included as an integral part of the training process to monitor it and detect overfitting, perhaps combined with \textit{early stopping} as a form of regularization.
 
-Interleave validation as part of the training to detect overfitting
+Second, given the results obtained, overfitting arises as one of the major problems with the model developed. Unfortunately, I realized very late the need for regularization mechanisms, such as \textit{batch normalization} and \textit{dropout}. This would be the most important improvements to undertake in the future, combined with the use of validation during the training procedure.
 
-Use tensorboard visualization
+Third, it would be convenient to conduct more experiments, and in a more principled way, so as to have a proper distribution of values for the most important hyperparameters. It would be also very helpful to perform most of these experiments on a smaller dataset, such as the Flickr8K or the Flickr30K datasets, to get a more comprehensive understanding on the effects of the various hyperparameters and how to tune them before moving into larger datasets. 
 
-Create an online image captioning application, for example using Tensorflow.js, to generate captions for images uploaded n the browser
+Fourth, it would be nice to have a baseline to compare against, such as the same basic model without the attention mechanism. Actually, I tried to do this but something went wrong and I did not have time enough to debug it.
+
+Finally, in addition to monitoring validation while training, it would also be very interesting to include some form of visualization, probably by means of the \textit{Tensorboard} visualization tool. This is something I did not have the opportunity to explore, but I would definitely add this as something to address in the future.
+
+Besides the proposed improvements, there are a number of things that could be done in the future to extend the work done for this project.
+
+\begin{itemize}
+    \item To begin with, it would be nice to develop alternative models of attention to compare with, such as the global attention mechanism proposed by \citet{Luong2015} or a hierarchical attention mechanism as the one proposed by \citet{Khademi2018}.
+    \item I'm really curious about the possibility of adding reinforcement learning to improve the captioning process, in the likes of the model proposed by \citet{Rennie2017}.
+    \item Finally, aside from other forms of attention and alternative methods to generate captions, it would be nice to build an online application for demonstrative purposes. Since our model was developed in Tensorflow, it would be easy to load the model into a Web App by means of the \href{https://www.tensorflow.org/js}{Tensorflow.js} library.
+\end{itemize}
+
+\section{Concluding remarks}
+
+All in all, retrospectively, I am very happy with having chosen this problem for my Master Thesis. It is a very challenging problem, and it was very exciting as a research problem. As a matter of fact, I ended up dedicating far more time than planned surveying the state of the art, but I did not regret this at all; it was quite inspiring to see so many advances in such a brief period of time.
+
+However, I felt like I would have needed far more time to develop a more satisfactory system. In the end, the results were not up to my expectations, and I am looking forward to improving and extending it in my free time in the near future.

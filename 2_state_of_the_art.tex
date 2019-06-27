@@ -258,7 +258,7 @@ Realizing the high specialization of most approaches to multi-modal learning pro
 
 \citet{Fu2017} introduce an approach that aims at exploiting the parallel structures between images and sentences. In this model, the generation of the next word is aligned with the visual perception experience, where the attention shifting among the visual regions imposes a thread of visual ordering. In addition, this method uses high-level semantic information in the form of scene-specific contexts. This method works as follows: First, selective search \citep{Uijlings2013} is applied to construct a hierarchical segmentation of the image containing image regions/patches at different scales. Second, a small number of regions are selected for further processing based on the criterion of being semantically meaningful, non-compositional and contextually rich. Next, visual features are extracted from regions using a deep CNN. The sentence generation process is guided by an attention-based multi-modal LSTM decoder. The visual attention mechanism is inspired by the model described in \citep{Xu2015}, but it is enriched with information representing the scene-specific context. This information is modeled as scene vectors obtained by Latent Dirichlet Allocation (LDA) \citep{Blei2003} and a multilayer perceptron.
 
-\subsubsection{Other approaches}
+\subsection{Other approaches}
 
 \subsubsection{Language Convolutional Neural Networks}
 
@@ -320,7 +320,7 @@ Another approach to make image captioning capable of describing novel objects is
 
 % \section{Other trends: ensemble methods}
 
-\section{Datasets and evaluation}
+\section{Datasets and evaluation}\label{sec:evaluation}
 
 There is a wide range of datasets available for automatic image captioning research. The images in these datasets are linked to textual captions, and differ from each other in certain aspects such as in size, the format of the captions, or the procedure used to collect the data. This section presents a brief overview of the common approaches used to collect data, the datasets themselves, and the metrics utilized for model evaluation and benchmarking.
 
@@ -328,7 +328,7 @@ The datasets are summarized in \cref{tab:datasets}, and examples of images their
 
 Some authors establish a difference between image captions and image descriptions, and in this survey we have actually used them interchangeably. However, such a distinction is relevant when presenting datasets. Image descriptions verbalize what can be seen in the image, i.e., they refer to the objects, actions, and attributes depicted, etc. Captions, on the other hand, typically provide information that cannot be seen in the image or is not evident, such as personal, cultural, or historical context. Images shared through social networks or photo-sharing websites can be accompanied by descriptions or captions, or a mixture of both types of text. The images in a newspaper or a museum will typically contain cultural or historical texts, i.e., captions not 
 
-\subsection{Datasets}\label{sec:datasets}
+\subsection{Datasets}\label{subsec:datasets}
 
 This subsection briefly describes the most popular datasets used in image description tasks, sorted by year of publication.
 
@@ -391,7 +391,7 @@ This subsection summarizes other datasets that, in spite of being less popular t
 \item The \textbf{VQA} (Visual Question Answering) dataset is intended to support a variation of the image description problem called \textit{visual question answering}: given an image and a natural language question about the image, the task is to provide an accurate natural language answer \citep{Antol2015}. To that aim, the dataset contains 50K abstract scenes using clip-art style graphics. It includes 20 paperdoll human models spanning genders, races, and ages with 8 different expressions, over 100 objects and 31 animals in various poses. The images are completed with five captions per image, as well as diverse questions and answers.
 \end{itemize}
 
-\subsection{Evaluation metrics}\label{sec:metrics}
+\subsection{Evaluation metrics}\label{subsec:metrics}
 
 Evaluating Natural Language Generation (NLG) systems is a fundamentally difficult task \citep{Reiter2009}, so that it has become a research problem itself. However, we will simply summarize the metrics commonly used for evaluating the quality of image descriptions generated automatically.
 

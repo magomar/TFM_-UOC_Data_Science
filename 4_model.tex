@@ -1,5 +1,5 @@
 \chapter{Model architecture and processes}
-\label{ch:design}
+\label{ch:model}
 
 In this chapter, both the architecture and the training and inference mechanisms of a concrete system are described. We begin introducing the overall architecture of the system, followed by specific sections devoted to the different parts of the system: encoder, decoder and attention mechanism. Finally, we describe the methods used to train and evaluate the system.
 
@@ -44,7 +44,8 @@ The following sections will describe each component of the network architecture 
 
 \section{Encoder}\label{sec:encoder}
 
-The encoder consists of a \textbf{CNN} module \textit{pretrained} on the ImageNet dataset. Several options are available for this model. We have included some of the most popular convnets, including VGG-16\citep{Simonyan2015},Inception-V3\citep{Szegedy2016}, ResNet50\citep{He2016resnet}, and Xception \citep{Chollet2017}. We also tried to use the NASNet \citep{Zoph2018} large model, but it was impossible due to memory limitations\footnote{For a detailed description of how ConvNets work please check \cref{sec:cnn}. For a review of the most popular ConvNets, including some of the ones cited above, please see \cref{subsubsec:modern_cnn}.}.
+The encoder consists of a \textbf{CNN} module \textit{pretrained} on the ImageNet dataset. Several options are available for this model. We have included some of the most popular convnets, including VGG-16\citep{Simonyan2015},Inception-V3\citep{Szegedy2016}, ResNet50\citep{He2016resnet}, and Xception \citep{Chollet2017}. We also tried to use the NASNet \citep{Zoph2018} large model, but it was impossible due to memory limitations. Finally, we added the InceptionResnet \citet{Szegedy2016} model to the range of options available for the encoder.
+% \footnote{For a detailed description of how ConvNets work please check \cref{sec:cnn}. For a review of the most popular ConvNets, including some of the ones cited above, please see \cref{subsubsec:modern_cnn}.}.
 
 As an example, let us assume we are using Inception-V3 for the CNN module. The architecture of this network is shown in \cref{fig:inceptionv3}.
 
@@ -55,7 +56,7 @@ As an example, let us assume we are using Inception-V3 for the CNN module. The a
 	\label{fig:inceptionv3}
 \end{figure}
 
-This network receives an image represented by a 3D tensor with shape $(229, 229, 3)$, and generates an output consisting of 1001 logits, corresponding to the 1000 classification categories in the ImageNet dataset, plus an additional output to denote \textit{other} things not included in the labeled categories. However, we are interested in the last convolutional layer, just before entering the fully connected block. The output of a convolutional layer is a feature map organized as a grid of image patches and a number of features per image patch --the depth, or number of channels (see \cref{subsec:conv_layers}). As shown in \cref{fig:inceptionv3}, the output of the Inception-v3 network's last convolutional layer consists of $8 \times 8 \times 2048$ features, or in general, a 3D tensor of shape $(f_w, f_h, f_c)$, where $f_w$ and $f_h$ are the width and height of the feature map, respectively, and $f_c$ is the number of channels. However, instead of using this map as it is, it is squashed into a 2D tensor, with shape $(f_w \times f_h, f_c)$.
+This network receives an image represented by a 3D tensor with shape $(229, 229, 3)$, and generates an output consisting of 1001 logits, corresponding to the 1000 classification categories in the ImageNet dataset, plus an additional output to denote \textit{other} things not included in the labeled categories. However, we are interested in the last convolutional layer, just before entering the fully connected block. The output of a convolutional layer is a feature map organized as a grid of image patches and a number of features per image patch --the depth, or number of channels. As shown in \cref{fig:inceptionv3}, the output of the Inception-v3 network's last convolutional layer consists of $8 \times 8 \times 2048$ features, or in general, a 3D tensor of shape $(f_w, f_h, f_c)$, where $f_w$ and $f_h$ are the width and height of the feature map, respectively, and $f_c$ is the number of channels. However, instead of using this map as it is, it is squashed into a 2D tensor, with shape $(f_w \times f_h, f_c)$.
 
 Finally, the squashed output of the last convolutional layer is fed into a \textbf{fully connected layer} with a ReLu activation function. This layer contains a certain number $D$ of units, which is an hyperparameter of the model. After forwarding the features map across this layer, we obtain as output a 2D tensor with shape $(L, D)$, where $L$ is the number of image patches, and $D$ is the number of features used to encode each patch (the number of units of the fully connected layer). Note that from an implementation viewpoint, due to the use of batch processing, we should consider another dimension in our data, the batch size. However, from a mathematical perspective, and for the sake of simplicity, we can ignore this additional dimension. 
 
@@ -77,7 +78,8 @@ $$y = \{\text{y}_1,..., \text{y}_c\}, \text{y}_i \in \mathbb{R}^K$$
 where $K$ is the size of the vocabulary (number of words), and $C$ is the length of the caption.
 Each output $y_i$ is a vector with size $K$ that represents a probability distributions over the language vocabulary. That is, each element represents the probability of choosing one specific word. There are different ways to choose the final sentence from this sequence of probability distributions, as we will discuss later in this chapter.
 
-The core element of the decoder is a single \textbf{recurrent layer} (named \textbf{RNN} in \cref{fig:overall-architecture}), which consists of a number of recurrent unit with hidden state, either GRU or LSTM units indistinctly. Both the type of recurrent unit and the number of units are hyperparameters of the model \footnote{For a description of how recurrent units work the reader is referred to \cref{subsec:rnn}, and more specifically, the section on recurrent units with hidden state (\cref{subsubsec:rnn_with_hidden_state}). There are also specific sections on GRU (\cref{subsec:gru}) and LSTM (\cref{subsec:lstm}) units}.
+The core element of the decoder is a single \textbf{recurrent layer} (named \textbf{RNN} in \cref{fig:overall-architecture}), which consists of a number of recurrent unit with hidden state, either GRU or LSTM units indistinctly. Both the type of recurrent unit and the number of units are hyperparameters of the model.
+% \footnote{For a description of how recurrent units work the reader is referred to \cref{subsec:rnn}, and more specifically, the section on recurrent units with hidden state (\cref{subsubsec:rnn_with_hidden_state}). There are also specific sections on GRU (\cref{subsec:gru}) and LSTM (\cref{subsec:lstm}) units}
 
 In addition to the recurrent layer, the encoder also comprises an embedding layer and two fully connected layers stacked on top of the recurrent layer. 
 
@@ -91,7 +93,7 @@ The fully connected layers FC1 and FC2 constitute an MLP that is used to generat
 
 \subsection{Attention}\label{subsec:attention}
 
-The attention mechanism is responsible of deciding on which parts of the image to focus on at each timestep. In particular, we have designed an attention mechanism inspired by the model described in \textit{Show, Attend and Tell}, by \citet{Xu2015}, which is in turn based on the mechanism proposed by \citet{Bahdanau2015} as an addition to the \textit{seq2seq} model. More specifically, we replicate the  \textit{soft} attention mechanism proposed in the paper. This mechanism weights the features of each part of the image depending on a relevance score that is computed taking into account the current state of the decoder. This type of attention is called \textit{soft}, or \textit{global}, because it attends to the entire input space, unlike \textit{hard}/\textit{local} mechanisms, which attend to a specific location of the input space at any given moment, i.e. a patch of the image. Furthermore, this is a deterministic form of attention, as opposed to stochastic mechanisms, which use probability distributions to select the part of the input to focus at. Finally, this form attention can also be classified as self-attention, since the decoder attends to the encoder to generate its output, but it is also guided by its own internal state, as we will soon describe more formally.
+The attention mechanism is responsible of deciding on which parts of the image to focus on at each timestep. In particular, we have designed an attention mechanism inspired by the model described in \textit{Show, Attend and Tell}, by \citet{Xu2015}, which is in turn based on the mechanism proposed by \citet{Bahdanau2015} as an addition to the \textit{seq2seq} model. More specifically, we replicate the  \textit{soft} attention mechanism proposed in the paper. This mechanism weights the features of each part of the image depending on a relevance score that is computed taking into account the current state of the decoder. This type of attention is called \textit{soft}, or \textit{global}, because it attends to the entire input space, unlike \textit{hard}/\textit{local} mechanisms, which attend to a specific location of the input space at any given moment, i.e. a patch of the image. Furthermore, this is a deterministic form of attention, as opposed to stochastic mechanisms, which use probability distributions to select the part of the input to focus at. Finally, this form attention can also be classified as self-attention, since the decoder attends to the encoder to generate its output, but it is also guided by its own internal state, as we will soon describe more formally. For general information and details on this type of attention, please see \cref{subsec:attention}. 
 
 The output of the attention mechanism is called the context vector $\hat{z}_t$ we have already introduced. Now let us see how this vector is computed.
 
@@ -165,7 +167,7 @@ The section is organized as follows, first we describe the pre-processing steps 
 
 Images have to be encoded by a CNN to extract the visual features needed by the decoder. In order to be fed into the CNN, images have to be preprocessed first, which includes resizing them to the shape required by the particular CNN being used, as well as applying tweaks that are specific of each particular CNN. Some models use images with values ranging from 0 to 1, others from -1 to +1, yet others use the \textit{Caffe}\footnote{\textit{Caffe} is an open source deep learning framework, originally developed at University of California, Berkeley. More info can be found at the \href{http://caffe.berkeleyvision.org/}{official website}.} style, that is not normalized, but is centered. 
 
-To support using different CNNs for the encoder, we have developed a generic method that can preprocess images for different models, including the following:
+To support using different CNNs for the encoder, we have developed a generic method that can preprocess images for different models. \cref{tab:popular-convnets} summarizes the main characteristics of some of the most popular ConvNet architectures that are available to the research community as pretrained model, typically trained on the ImageNet dataset.
 
 % \begin{table}[]
 % \caption{Summary of ConvNets available for the encoder}
@@ -267,19 +269,16 @@ Given that input and the previous hidden state $t_{t-1}$, the RNN will generate 
 
 The losses for every word in the sentence will be computed separately and summed together to obtain a single loss value. Finally, the accumulated loss shall be divided by the length of the caption to obtain a loss value that is independent of the length of the caption.
 
-Besides, when computing the loss value, padding tokens should be avoided, which is done by means of masking. 
+Besides, when computing the loss value, padding tokens should be avoided, which is achieved by using a masked version of the loss function. 
 
-\begin{lstlisting}
-def compute_loss(labels, predictions, loss_function):
-    mask = tf.math.logical_not(tf.math.equal(labels, 0))
-    loss_ = loss_function(labels, predictions)
-
-    mask = tf.cast(mask, dtype=loss_.dtype)
-    loss_ *= mask
-
-    return tf.reduce_mean(loss_)
-\end{lstlisting}
-
+% \begin{lstlisting}
+% def compute_loss(labels, predictions, loss_function):
+%     mask = tf.math.logical_not(tf.math.equal(labels, 0))
+%     loss_ = loss_function(labels, predictions)
+%     mask = tf.cast(mask, dtype=loss_.dtype)
+%     loss_ *= mask
+%     return tf.reduce_mean(loss_)
+% \end{lstlisting}
 
 \subsection{Teacher forcing}\label{subsec:teacher_forcing}
 
@@ -309,16 +308,17 @@ Teacher forcing is a fast and effective way to train a recurrent neural network 
 
 \section{Inference and validation}\label{sec:inference}
 
-After the model is trained, it can be used to generate new sequences. To do that, we should simply fed a "<start>" token to the RNN start the process, and the generated word in the output sequence will then be used as input on the subsequent time step (along with the context vector coming from the attention mechanism).
+After the model is trained, it can be used to generate new sequences. To do that, we should simply fed a "<start>" token to the RNN start the process, and the generated word in the output sequence will then be used as input on the subsequent time step, along with the context vector coming from the attention mechanism. This process is depicted in \cref{fig:inference}
+
+The generation process will continue until the "<end>" token is reached, or a maximum sequence length is reached. 
 
 \begin{figure}[hpt]
 	\centering
 	\includegraphics[scale=0.5]{images/ch4/inference.png}
 	\caption{Word-by-word caption generation}
-	\label{fig:teacher-forcing}
+	\label{fig:inference}
 \end{figure}
 
-The generation process will continue until the "<end>" token is reached, or a maximum sequence length is reached.
 
 Various approaches exist to predict the next token. For example, in greedy search, the token with the highest score at each time step is chosen and used to predict the next token. However, there are more sophisticated approaches, introduce below. 
 
@@ -335,7 +335,6 @@ as the output.  Once the "<end>" symbol is detected, or the output sequence has 
 As we mentioned in out discussion of the decoder, the conditional probability of generating an output sequence based on the input sequence is $\prod_{t'=1}^{T'} \mathbb{P}(y_{t'} \mid y_1, \ldots, y_{t'-1}, \boldsymbol{c})$. We will take the output sequence with the highest conditional probability as the optimal sequence. The main problem with greedy search is that there is no guarantee that the optimal sequence will be obtained.
 
 Take a look at the example in \cref{fig:s2s_prob1}. We assume that there are four words "A", "B", "C", and "<end>" in the output dictionary.  The four numbers under each time step represent the conditional probabilities of generating "A", "B", "C", and "<end>" at that time step.  At each time step, greedy search selects the word with the highest conditional probability. Therefore, the output sequence "A", "B", "C", "<end>" will be generated in \cref{fig:s2s_prob1}. The conditional probability of this output sequence is $0.5\times0.4\times0.4\times0.6 = 0.048$.
-
 
 \begin{figure}[hpt]
 	\centering
